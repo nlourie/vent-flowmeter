@@ -79,10 +79,6 @@ p2_startup = p2.pressure
 dp_startup = p1_startup - p2_startup
 
 
-t = []
-p_cmH20    = [] # mouthpiece pressure, ie p1
-dp_cmH20   = [] # pressure difference -- p1 = exhalation, p1=  inspiration
-v = []
 
 
 # set up the realtime plot
@@ -102,6 +98,15 @@ t_total = 60 #seconds
 Npts = int(t_total*1000/dt)
 mbar2cmh20 = 0.980665
 i = 0
+
+
+t = list(np.zeros(Npts))
+p_cmH20    = list(np.zeros(Npts)) # mouthpiece pressure, ie p1
+dp_cmH20   = list(np.zeros(Npts)) # pressure difference -- p1 = exhalation, p1=  inspiration
+v = list(np.zeros(Npts))
+
+
+
 
 # This is a simple thing to check that stuff reads out
 def animate(i,t,p_cmH20,dp_cmH20,v):
