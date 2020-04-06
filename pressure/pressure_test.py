@@ -30,8 +30,11 @@ i2c = busio.I2C(board.SCL, board.SDA)
 p1 = adafruit_lps35hw.LPS35HW(i2c, address = 92)
 p2 = adafruit_lps35hw.LPS35HW(i2c, address = 93)
 
+
+# This is a simple thing to check that stuff reads out
 while True:
     try:
+        """
         print('Reading P1:')
         print(f'   P1 = {p1.pressure} hPa')
         print(f'   T1 = {p1.temperature} C')
@@ -39,9 +42,26 @@ while True:
         print('Reading P2:')
         print(f'   P2 = {p2.pressure} hPa')
         print(f'   T2 = {p2.temperature} C')
-    
-        time.sleep(1)
+        """
+        print(fdp = {p1.pressure - p2.pressure}')
+        time.sleep(0.1)
     
     except KeyboardInterrupt:
         break
     
+
+
+
+# Now read out the pressure difference between the sensors
+
+# First: zero out the pressure sensors to the current ambient pressure
+#p1.zero_pressure()
+#p2.zero_pressure()
+
+time = []
+p    = [] # mouthpiece pressure, ie p1
+dp   = [] # pressure difference -- p1 = exhalation, p1=  inspiration
+
+# set up the realtime plot
+
+
