@@ -44,7 +44,9 @@ p2.data_rate = adafruit_lps35hw.DataRate.RATE_75_HZ
 # Now read out the pressure difference between the sensors
 
 # First: get the dp for zero flow from startup
-dp_startup = p1.pressure - p2.pressure
+p1_startup = p1.pressure
+p2_startup = p2.pressure
+dp_startup = p1_startup - p2_startup
 
 
 t = []
@@ -54,14 +56,11 @@ v = []
 
 
 # set up the realtime plot
-fig = plt.figure()
-p_ax = fig.add_subplot(3,1,1)
+fig, (p_ax,f_ax,v_ax) = plt.subplots(3, 1)
 p_ax.set_ylabel('Pressure (cm H20)')
 
-f_ax = fig.add_subplot(3,1,2)
 f_ax.set_ylabel('Flow (au)')
 
-v_ax = fig.add_subplot(3,1,3)
 v_ax.set_ylabel('Tidal Volume (au)')
 v_ax.set_xlabel('Time')
 
@@ -77,7 +76,7 @@ i = 0
 # This is a simple thing to check that stuff reads out
 def animate(i,t,p_cmH20,dp_cmH20,v):
     try:
-        pcur_cmH20 = p1.pressure*mbar2cmh20
+        pcur_cmH20 = (p1.pressure-p1.startup)*mbar2cmh20
         dpcur_cmH20 = ((p1.pressure - p2.pressure)-dp_startup)*mbar2cmh20
         
 
@@ -122,6 +121,7 @@ def animate(i,t,p_cmH20,dp_cmH20,v):
 
 # set up plot to call animate() function periodically
 ani = animation.FuncAnimation(fig,animate,fargs = (t,p_cmH20,dp_cmH20,v),interval = dt)
+plt.tight_layout()
 plt.show()
     
     
