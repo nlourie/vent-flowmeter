@@ -21,6 +21,34 @@ import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
 
+def zerophase_lowpass(x,lf,fs):
+    # filter flow using S-G filter
+    
+    # filter flow
+    N = 2 # the higher the sharper the peak is
+    # length = 1s (cut off frequency = 0.965 Hz)
+    # Refer. Schafer, 2011, What is S-G filter.
+    # fc_n = (N+1)/(3.2M - 4.6) (normalized unit)
+    # fc(Hz) = fc_n*fs/2;
+    # N: order: M length;
+    # fc=lf(Hz) -> fc_n = 2*lf/fs;
+    # M = [(N+1)*fs/(2*lf)+4.6]/3.2;
+    
+    # l_lfilter = round(fs*lf); % the longer, the smoother
+    # l_lfilter = round(fs*lf); % the longer, the smoother
+    
+    l_lfilter = np.int(np.round(((N+1)*fs/(2*lf)+4.6)/3.2))
+    #print('l_lfilter = ',l_lfilter)
+    if np.mod(l_lfilter,2) == 0:
+        l_lfilter = l_lfilter + 1
+        #print('made odd: l_lfilter = ',l_lfilter)
+    
+    # filter flow signal
+    x_filt = signal.savgol_filter(x,polyorder = N,window_length = l_lfilter)
+    return x_filt
+
+
+
 # Initialize the i2c bus
 i2c = busio.I2C(board.SCL, board.SDA)
 
@@ -44,6 +72,7 @@ p2.data_rate = adafruit_lps35hw.DataRate.RATE_75_HZ
 # Now read out the pressure difference between the sensors
 
 # First: get the dp for zero flow from startup
+
 p1_startup = p1.pressure
 p2_startup = p2.pressure
 dp_startup = p1_startup - p2_startup
@@ -90,6 +119,10 @@ def animate(i,t,p_cmH20,dp_cmH20,v):
         t  = t[-Npts:]
         p_cmH20  = p_cmH20[-Npts:]
         dp_cmH20 = dp_cmH20[-Npts:]
+        
+        # remove the drift in the flow
+        flow_drift = zerophase_lowpass(dp_cmH20,lf=2,fs = 1/dt)
+        
         v_au = np.cumsum(dp_cmH20)
         
         """
@@ -111,6 +144,7 @@ def animate(i,t,p_cmH20,dp_cmH20,v):
         
         p_ax.plot(t,p_cmH20)
         f_ax.plot(t,dp_cmH20)
+        f_ax.plot(t,flow_drift)
         v_ax.plot(t,v_au)
         
         
