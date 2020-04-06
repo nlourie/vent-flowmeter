@@ -22,7 +22,7 @@ import adafruit_lps35hw
 i2c = busio.I2C(board.SCL, board.SDA)
 
 # Using the adafruit_lps35hw class to read in the pressure sensor
-p1 = adafruit_lps35hw.LPS35HW(i2c,address = 0x5c)
+p1 = adafruit_lps35hw.LPS35HW(i2c,address = 92)
 
 print('Reading P1:')
 print(f'   P1 = {p1.pressure} hPa')
