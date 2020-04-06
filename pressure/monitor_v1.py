@@ -17,6 +17,7 @@ import busio
 import adafruit_lps35hw
 from datetime import datetime
 import numpy as np
+from scipy import signal
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 
