@@ -17,7 +17,8 @@ import busio
 import adafruit_lps35hw
 from datetime import datetime
 import numpy as np
-
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 
 # Initialize the i2c bus
@@ -49,16 +50,20 @@ p_cmH20    = [] # mouthpiece pressure, ie p1
 dp_cmH20   = [] # pressure difference -- p1 = exhalation, p1=  inspiration
 
 # set up the realtime plot
+fig = plt.figure()
+p_ax = fig.add_subplot(111)
 
 
 
+
+# Define the loop
 dt = 100 #ms 
 t_total = 60 #seconds
 Npts = int(t_total*1000/dt)
 mbar2cmh20 = 0.980665
 
 # This is a simple thing to check that stuff reads out
-while True:
+def animate(t,p_cmH20,dp_cmH20):
     try:
         pcur_cmH20 = p1.pressure*mbar2cmh20
         dpcur_cmH20 = (p1.pressure - p2.pressure)*mbar2cmh20
@@ -82,9 +87,26 @@ while True:
         print('Reading P2:')
         print(f'   P2 = {p2.pressure} hPa')
         print(f'   T2 = {p2.temperature} C')
-        """
+        
         print(f'dP (cal) = {dp_cmH20_cal[-1]} cm H20')
         time.sleep(dt/1000)
-    
+        """
+        # draw x and y lists
+        p_ax.clear()
+        p_ax.plot(t,dp_cmH20_cal)
+      
     except KeyboardInterrupt:
-        break
+        pass
+
+# set up plot to call animate() function periodically
+ani = animation.FuncAnimation(fig,animate,fargs = (t,p_cmH20,dp_cmH20),interval = dt)
+plt.show()
+    
+    
+    
+    
+    
+    
+    
+    
+    
