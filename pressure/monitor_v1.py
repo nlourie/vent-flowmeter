@@ -95,21 +95,21 @@ v_ax.set_xlabel('Time')
 # Define the loop
 dt = 1000/75 #ms 
 t_total = 60 #seconds
-Npts = int(t_total*1000/dt)
+Npts = 25 #int(t_total*1000/dt)
 mbar2cmh20 = 0.980665
 i = 0
+indx = []
 
-
-t = list(np.zeros(Npts))
-p_cmH20    = list(np.zeros(Npts)) # mouthpiece pressure, ie p1
-dp_cmH20   = list(np.zeros(Npts)) # pressure difference -- p1 = exhalation, p1=  inspiration
-v = list(np.zeros(Npts))
+t = []
+p_cmH20    = [] # mouthpiece pressure, ie p1
+dp_cmH20   = [] # pressure difference -- p1 = exhalation, p1=  inspiration
+v = []
 
 
 
 
 # This is a simple thing to check that stuff reads out
-def animate(i,t,p_cmH20,dp_cmH20,v):
+def animate(i,indx,t,p_cmH20,dp_cmH20,v):
     try:
         pcur_cmH20 = (p1.pressure-p1_startup)*mbar2cmh20
         dpcur_cmH20 = ((p1.pressure - p2.pressure)-dp_startup)*mbar2cmh20
@@ -117,21 +117,25 @@ def animate(i,t,p_cmH20,dp_cmH20,v):
 
         
         t.append(datetime.utcnow())
+        #print('t = ',t)
         p_cmH20.append(pcur_cmH20)
         dp_cmH20.append(dpcur_cmH20)
-
+        indx.append(i)
         
         # limit the number of items in the vectors
         t  = t[-Npts:]
         p_cmH20  = p_cmH20[-Npts:]
         dp_cmH20 = dp_cmH20[-Npts:]
-        
+        indx = indx[-Npts:] 
         # remove the drift in the flow
         filter_len_sec = 2.0 #s
         filter_len_samples = int(filter_len_sec*1000/dt)
-        flow_drift = zerophase_lowpass(dp_cmH20,lf=filter_len_samples,fs = 1/dt)
         
-        v_au = np.cumsum(dp_cmH20)
+        if i > Npts:
+            flow_drift = zerophase_lowpass(dp_cmH20,lf=2,fs = 1.0/((t[1]-t[0]).total_seconds()))
+            #print('flow_drift',flow_drift)
+
+            v_au = np.cumsum(dp_cmH20)
         
         """
         print('Reading P1:')
@@ -150,19 +154,20 @@ def animate(i,t,p_cmH20,dp_cmH20,v):
         f_ax.clear()
         v_ax.clear()
         
-        p_ax.plot(t,p_cmH20)
-        f_ax.plot(t,dp_cmH20)
-        f_ax.plot(t,flow_drift)
-        v_ax.plot(t,v_au)
-        
+        p_ax.plot(indx,p_cmH20)
+        f_ax.plot(indx,dp_cmH20)
+        if i > Npts:
+            f_ax.plot(indx,flow_drift)
+            v_ax.plot(indx,v_au)
         
         i+=1
+        print('i = ',i)
       
     except KeyboardInterrupt:
         pass
 
 # set up plot to call animate() function periodically
-ani = animation.FuncAnimation(fig,animate,fargs = (t,p_cmH20,dp_cmH20,v),interval = dt)
+ani = animation.FuncAnimation(fig,animate,fargs = (indx,t,p_cmH20,dp_cmH20,v),interval = dt)
 plt.tight_layout()
 plt.show()
     
