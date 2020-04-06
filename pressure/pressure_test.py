@@ -69,7 +69,7 @@ i = 0
 def animate(i,t,p_cmH20,dp_cmH20):
     try:
         pcur_cmH20 = p1.pressure*mbar2cmh20
-        dpcur_cmH20 = (p1.pressure - p2.pressure)*mbar2cmh20
+        dpcur_cmH20 = ((p1.pressure - p2.pressure)-dp_startup)*mbar2cmh20
         
         t.append(datetime.utcnow())
         p_cmH20.append(pcur_cmH20)
@@ -80,7 +80,6 @@ def animate(i,t,p_cmH20,dp_cmH20):
         t  = t[-Npts:]
         p_cmH20  = p_cmH20[-Npts:]
         dp_cmH20 = dp_cmH20[-Npts:]
-        dp_cmH20_cal = dp_cmH20 - dp_startup*mbar2cmh20
               
         """
         print('Reading P1:')
@@ -96,7 +95,7 @@ def animate(i,t,p_cmH20,dp_cmH20):
         """
         # draw x and y lists
         p_ax.clear()
-        p_ax.plot(t,dp_cmH20_cal)
+        p_ax.plot(t,dp_cmH20)
         i+=1
       
     except KeyboardInterrupt:
