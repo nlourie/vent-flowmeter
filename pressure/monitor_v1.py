@@ -127,8 +127,8 @@ def animate(i,t,p_cmH20,dp_cmH20,v):
         dp_cmH20 = dp_cmH20[-Npts:]
         
         # remove the drift in the flow
-        filter_len_sec = 2 #s
-        filter_len_samples = filter_len_sec*1000/dt
+        filter_len_sec = 2.0 #s
+        filter_len_samples = int(filter_len_sec*1000/dt)
         flow_drift = zerophase_lowpass(dp_cmH20,lf=filter_len_samples,fs = 1/dt)
         
         v_au = np.cumsum(dp_cmH20)
