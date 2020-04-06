@@ -22,9 +22,24 @@ import adafruit_lps35hw
 i2c = busio.I2C(board.SCL, board.SDA)
 
 # Using the adafruit_lps35hw class to read in the pressure sensor
-p1 = adafruit_lps35hw.LPS35HW(i2c,address = 92)
+    # note the address must be in decimal.
+    # allowed addresses are: 
+        # 92 (0x5c - if you put jumper from SDO to Gnd)
+        # 93 (0x5d - default)
+        
+p1 = adafruit_lps35hw.LPS35HW(i2c, address = 92)
+p2 = adafruit_lps35hw.LPS35HW(i2c, address = 93)
 
-print('Reading P1:')
-print(f'   P1 = {p1.pressure} hPa')
-print(f'   T1 = {p1.temperature} C')
-
+while True:
+    try:
+        print('Reading P1:')
+        print(f'   P1 = {p1.pressure} hPa')
+        print(f'   T1 = {p1.temperature} C')
+        
+        print('Reading P2:')
+        print(f'   P2 = {p2.pressure} hPa')
+        print(f'   T2 = {p2.temperature} C')
+    
+    except KeyboardInterrupt:
+        pass
+    
