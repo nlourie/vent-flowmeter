@@ -15,6 +15,7 @@ import time
 import board
 import busio
 import adafruit_lps35hw
+from datetime import datetime
 
 
 
@@ -31,23 +32,7 @@ p1 = adafruit_lps35hw.LPS35HW(i2c, address = 92)
 p2 = adafruit_lps35hw.LPS35HW(i2c, address = 93)
 
 
-# This is a simple thing to check that stuff reads out
-while True:
-    try:
-        """
-        print('Reading P1:')
-        print(f'   P1 = {p1.pressure} hPa')
-        print(f'   T1 = {p1.temperature} C')
-        
-        print('Reading P2:')
-        print(f'   P2 = {p2.pressure} hPa')
-        print(f'   T2 = {p2.temperature} C')
-        """
-        print(f'fdp = {p1.pressure - p2.pressure}')
-        time.sleep(0.1)
-    
-    except KeyboardInterrupt:
-        break
+
     
 
 
@@ -58,10 +43,46 @@ while True:
 #p1.zero_pressure()
 #p2.zero_pressure()
 
-time = []
-p    = [] # mouthpiece pressure, ie p1
-dp   = [] # pressure difference -- p1 = exhalation, p1=  inspiration
+t = []
+p_cmH20    = [] # mouthpiece pressure, ie p1
+dp_cmH20   = [] # pressure difference -- p1 = exhalation, p1=  inspiration
 
 # set up the realtime plot
 
 
+
+dt = 100 #ms 
+t_total = 60 #seconds
+Npts = int(t_total*1000/dt)
+mbar2cmh20 = 0.980665
+
+# This is a simple thing to check that stuff reads out
+while True:
+    try:
+        pcur_cmH20 = p1.pressure*mbar2cmh20
+        dpcur_cmH20 = (p1.pressure - p2.pressure)*mbar2cmh20
+        
+        t.append(datetime.utcnow())
+        p_cmH20.append(pcur_cmH20)
+        dp_cmH20.append(dpcur_cmH20)
+
+        
+        # limit the number of items in the vectors
+        t  = t[-Npts:]
+        p_cmH20  = p_cmH20[-Npts:]
+        dp_cmH20 = dp_cmH20[-Npts:]
+              
+        """
+        print('Reading P1:')
+        print(f'   P1 = {p1.pressure} hPa')
+        print(f'   T1 = {p1.temperature} C')
+        
+        print('Reading P2:')
+        print(f'   P2 = {p2.pressure} hPa')
+        print(f'   T2 = {p2.temperature} C')
+        """
+        print(f'dp = {dpcur_cmH20}')
+        time.sleep(dt/1000)
+    
+    except KeyboardInterrupt:
+        break
