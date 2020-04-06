@@ -16,6 +16,7 @@ import board
 import busio
 import adafruit_lps35hw
 from datetime import datetime
+import numpy as np
 
 
 
@@ -71,6 +72,7 @@ while True:
         t  = t[-Npts:]
         p_cmH20  = p_cmH20[-Npts:]
         dp_cmH20 = dp_cmH20[-Npts:]
+        dp_cmH20_cal = dp_cmH20 - np.mean(dp_cmH20)
               
         """
         print('Reading P1:')
@@ -81,7 +83,7 @@ while True:
         print(f'   P2 = {p2.pressure} hPa')
         print(f'   T2 = {p2.temperature} C')
         """
-        print(f'dp = {dpcur_cmH20}')
+        print(f'dP (cal) = {dp_cmH20_cal[-1]} cm H20')
         time.sleep(dt/1000)
     
     except KeyboardInterrupt:
