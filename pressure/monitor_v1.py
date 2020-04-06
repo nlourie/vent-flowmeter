@@ -39,7 +39,7 @@ def zerophase_lowpass(x,lf,fs):
     # l_lfilter = round(fs*lf); % the longer, the smoother
     
     l_lfilter = np.int(np.round(((N+1)*fs/(2*lf)+4.6)/3.2))
-    #print('l_lfilter = ',l_lfilter)
+    print('l_lfilter = ',l_lfilter)
     if np.mod(l_lfilter,2) == 0:
         l_lfilter = l_lfilter + 1
         #print('made odd: l_lfilter = ',l_lfilter)
