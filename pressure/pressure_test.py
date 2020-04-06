@@ -33,8 +33,8 @@ i2c = busio.I2C(board.SCL, board.SDA)
 p1 = adafruit_lps35hw.LPS35HW(i2c, address = 92)
 p2 = adafruit_lps35hw.LPS35HW(i2c, address = 93)
 
-p1.DataRate.RATE_75_HZ()
-p2.DataRate.RATE_75_HZ()
+p1.data_rate = p1.DataRate.RATE_75_HZ
+p2.data_rate = p2.DataRate.RATE_75_HZ
 
 
     
