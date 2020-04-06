@@ -33,6 +33,8 @@ i2c = busio.I2C(board.SCL, board.SDA)
 p1 = adafruit_lps35hw.LPS35HW(i2c, address = 92)
 p2 = adafruit_lps35hw.LPS35HW(i2c, address = 93)
 
+p1.DataRate.RATE_75_HZ()
+p2.DataRate.RATE_75_HZ()
 
 
     
@@ -41,9 +43,9 @@ p2 = adafruit_lps35hw.LPS35HW(i2c, address = 93)
 
 # Now read out the pressure difference between the sensors
 
-# First: zero out the pressure sensors to the current ambient pressure
-#p1.zero_pressure()
-#p2.zero_pressure()
+# First: get the dp for zero flow from startup
+dp_startup = p1.pressure - p2.pressure
+
 
 t = []
 p_cmH20    = [] # mouthpiece pressure, ie p1
@@ -57,7 +59,7 @@ p_ax = fig.add_subplot(111)
 
 
 # Define the loop
-dt = 100 #ms 
+dt = 1000/75 #ms 
 t_total = 60 #seconds
 Npts = int(t_total*1000/dt)
 mbar2cmh20 = 0.980665
@@ -78,7 +80,7 @@ def animate(i,t,p_cmH20,dp_cmH20):
         t  = t[-Npts:]
         p_cmH20  = p_cmH20[-Npts:]
         dp_cmH20 = dp_cmH20[-Npts:]
-        dp_cmH20_cal = dp_cmH20 - np.mean(dp_cmH20)
+        dp_cmH20_cal = dp_cmH20 - dp_startup*mbar2cmh20
               
         """
         print('Reading P1:')
