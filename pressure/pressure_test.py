@@ -43,7 +43,7 @@ while True:
         print(f'   P2 = {p2.pressure} hPa')
         print(f'   T2 = {p2.temperature} C')
         """
-        print(fdp = {p1.pressure - p2.pressure}')
+        print(f'fdp = {p1.pressure - p2.pressure}')
         time.sleep(0.1)
     
     except KeyboardInterrupt:
