@@ -40,6 +40,8 @@ while True:
         print(f'   P2 = {p2.pressure} hPa')
         print(f'   T2 = {p2.temperature} C')
     
+        time.sleep(1)
+    
     except KeyboardInterrupt:
-        pass
+        break
     
