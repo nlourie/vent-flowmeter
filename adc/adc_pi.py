@@ -15,6 +15,11 @@ import board
 import busio
 import time
 import matplotlib.pyplot as plt
+import matplotlib.animation as animation
+from datetime import datetime
+import numpy as np
+
+
 
 i2c = busio.I2C(board.SCL,board.SDA)
 
@@ -27,24 +32,48 @@ ads = ADS.ADS1115(i2c)
 chan = AnalogIn(ads,ADS.P3)
 
 
-v = []
-index = []
+xs = []
+ys = []
 fig = plt.figure()
 ax = fig.add_subplot(111)
-
 i = 0
 
+dt = 10 # ms
+T = 10 # seconds
+
+Nmax = np.int(T*100/dt)
+
+def animate(i,xs,ys):
+    v = chan.voltage
+    t = datetime.utcnow()
+
+    xs.append(t)
+    ys.append(v)
+    
+    # limit the number of items in the vectors
+    xs = xs[-Nmax:]
+    ys = ys[-Nmax:]
+
+    # draw x and y lists
+    ax.clear()
+    ax.plot(xs,ys)
+
+
+# set up plot to call animate() function periodically
+ani = animation.FuncAnimation(fig,animate,fargs = (xs,ys),interval = dt)
+plt.show()
+
+"""
 while True:
-    #print(chan.value, chan.voltage)
+    print('loop = ',i, chan.voltage)
     index.append(i)
     v.append(chan.voltage)
-    plt.plot(index,v)
+    ax.plot(index,v)
     fig.canvas.draw()
-    ax.set_xlim(lef = max(0,i-50),right = i+50)
-    
+    #ax.set_xlim(left = max(0,i-50),right = i+50)
     
     
     
     time.sleep(0.1)
     i+=1
-    
+"""    
