@@ -76,7 +76,7 @@ i = 0
 # This is a simple thing to check that stuff reads out
 def animate(i,t,p_cmH20,dp_cmH20,v):
     try:
-        pcur_cmH20 = (p1.pressure-p1.startup)*mbar2cmh20
+        pcur_cmH20 = (p1.pressure-p1_startup)*mbar2cmh20
         dpcur_cmH20 = ((p1.pressure - p2.pressure)-dp_startup)*mbar2cmh20
         
 
