@@ -61,9 +61,10 @@ dt = 100 #ms
 t_total = 60 #seconds
 Npts = int(t_total*1000/dt)
 mbar2cmh20 = 0.980665
+i = 0
 
 # This is a simple thing to check that stuff reads out
-def animate(t,p_cmH20,dp_cmH20):
+def animate(i,t,p_cmH20,dp_cmH20):
     try:
         pcur_cmH20 = p1.pressure*mbar2cmh20
         dpcur_cmH20 = (p1.pressure - p2.pressure)*mbar2cmh20
@@ -94,6 +95,7 @@ def animate(t,p_cmH20,dp_cmH20):
         # draw x and y lists
         p_ax.clear()
         p_ax.plot(t,dp_cmH20_cal)
+        i+=1
       
     except KeyboardInterrupt:
         pass
