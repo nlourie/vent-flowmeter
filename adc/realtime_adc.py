@@ -34,8 +34,8 @@ chan = AnalogIn(ads,ADS.P3)
 
 #Honeywell Volts to FLow calibration
 
-f = [0.,25.,50.,75.,100.,150.,200.]
-v = [1,2.99,3.82,4.3,4.58,4.86,5.0]
+f = [0.,0.,25.,50.,75.,100.,150.,200.]
+v = [0.,1,2.99,3.82,4.3,4.58,4.86,5.0]
 honeywell_v2f = interp1d(v,f,kind = 'cubic')
 
 
@@ -55,7 +55,7 @@ class MainWindow(QtWidgets.QMainWindow):
         
         # Set the label properties with valid CSS commands -- https://groups.google.com/forum/#!topic/pyqtgraph/jS1Ju8R6PXk
         labelStyle = {'color': '#FFF', 'font-size': '24pt'}
-        self.graphWidget.setLabel('bottom', '', 'Units', **labelStyle)
+        self.graphWidget.setLabel('bottom', 'Time', 's', **labelStyle)
         self.graphWidget.setLabel('left', 'Flow (L/m)',**labelStyle)
         
         # change the plot range
@@ -63,7 +63,8 @@ class MainWindow(QtWidgets.QMainWindow):
         #self.graphWidget.setYRange(30,40,padding = 0.1)
                                              
         self.x  = [0]
-        self.t = datetime.utcnow()
+        self.t = np.array([datetime.utcnow()])
+        self.dt =t 
         self.y = [honeywell_v2f(chan.voltage)]
 
         # plot data: x, y values
@@ -71,9 +72,9 @@ class MainWindow(QtWidgets.QMainWindow):
         pen = pg.mkPen(color = 'y',width = 1)
         self.data_line = self.graphWidget.plot(self.t, self.y,pen = pen)
         
-        t_update = 10 #update time of timer in ms
+        self.t_update = 10 #update time of timer in ms
         self.timer = QtCore.QTimer()
-        self.timer.setInterval(t_update)
+        self.timer.setInterval(self.t_update)
         self.timer.timeout.connect(self.update_plot_data)
         self.timer.start()
         
@@ -86,7 +87,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.y = self.y[1:] # remove the first element
             self.t = self.t[1:] # remove the first element
         self.x.append(self.x[-1] + 1) # add a new value 1 higher than the last
-        self.t.append(datetime.utcnow())
+        self.t.append(float(self.x[-1] + 1)/(1000.0/self.t_update))
         self.y.append( honeywell_v2f(v) ) # add a new random value
         
         self.data_line.setData(self.t,self.y) #update the data
