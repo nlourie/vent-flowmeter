@@ -70,19 +70,20 @@ class MainWindow(QtWidgets.QMainWindow):
         # plot data: x, y values
         # make a QPen object to hold the marker properties
         pen = pg.mkPen(color = 'y',width = 1)
-        self.data_line = self.graphWidget.plot(self.t, self.y,pen = pen)
+        self.data_line = self.graphWidget.plot(self.dt, self.y,pen = pen)
         
         self.t_update = 10 #update time of timer in ms
         self.timer = QtCore.QTimer()
         self.timer.setInterval(self.t_update)
         self.timer.timeout.connect(self.update_plot_data)
         self.timer.start()
+        self.time_to_show = 60.0 #s
         
     def update_plot_data(self):
         # This is what happens every timer loop
         v = chan.voltage
-        Npts_to_show = 1000
-        if len(self.x) >= Npts_to_show:
+        
+        if self.dt[-1] >= self.time_to_show:
             self.x = self.x[1:] # Remove the first element
             self.y = self.y[1:] # remove the first element
             self.t = self.t[1:] # remove the first element
@@ -92,7 +93,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dt = [float((ti - self.t[0]).total_seconds()) for ti in self.t]
         self.y.append( honeywell_v2f(v) ) # add a new random value
         
-        self.data_line.setData(self.t,self.y) #update the data
+        self.data_line.setData(self.dt,self.y) #update the data
         
         
 def main():
