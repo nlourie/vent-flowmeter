@@ -143,12 +143,12 @@ def createFit(t,breath,SmoothingParam,plotflag = False):
     spline_model = interpolate.UnivariateSpline(t,breath,s = SmoothingParam)
     
     # Get the second derivative
-    d2 = derivative(spline_model,x0 = xData,n = 2,dx = 0.1)
+    d2 = derivative(spline_model,x0 = xData,n = 2,dx = 15/fs)
     
     # only look for inflection point from between 25% and 100% of the breath
     #print(xData)
     
-    ind_range = range(np.int(np.round(0.25*len(d2))),np.int(np.round(0.9*len(d2))))
+    ind_range = range(np.int(np.round(0.25*len(d2))),np.int(np.round(0.95*len(d2))))
     xData_range = xData[ind_range]
     
     #print(xData_range)
@@ -160,22 +160,22 @@ def createFit(t,breath,SmoothingParam,plotflag = False):
     infl_p_flow = yData_range[np.argmax(d2_range)]
     
     if plotflag:
-        plt.figure()
-        plt.subplot(2,1,1)
-        plt.plot(xData_range,yData_range,label = 'data')
+        #plt.figure()
+        plt.subplot(3,1,1)
+        plt.plot(xData_range,yData_range,'bo',label = 'data',)
         plt.plot(xData_range,spline_model(xData_range),label = 'spline')
-        plt.plot(infl_p_time,infl_p_flow,'ro',label = 'inflection point')
+        plt.plot(infl_p_time,infl_p_flow,'rs',label = 'inflection point')
         plt.xlabel('time (s)')
         plt.ylabel('flow (L/s)')        
-        plt.legend()
+        #plt.legend()
         
-        plt.subplot(2,1,2)
+        plt.subplot(3,1,2)
         plt.title('Second Derivative')
         plt.plot(xData_range,d2_range,label = '2nd derivative')
         plt.plot(infl_p_time,infl_p_d2,'ro',label = 'inflection point')
-        plt.legend()
+        #plt.legend()
         plt.tight_layout()
-
+        
     return infl_p_time, infl_p_flow
 
 def Breath_detection(time,sig,fs,num,SmoothingParam,filterflag,plotflag = False):
@@ -216,7 +216,7 @@ def Breath_detection(time,sig,fs,num,SmoothingParam,filterflag,plotflag = False)
     
     ## apply low-pass filter to the signal if desired
     if filterflag:
-        lf = 2 #cutoff frequency (Hz)
+        lf = 2.0 #cutoff frequency (Hz)
         sig = zerophase_lowpass(sig,lf,fs)
     
     # remove mean
@@ -249,14 +249,26 @@ def Breath_detection(time,sig,fs,num,SmoothingParam,filterflag,plotflag = False)
         # get the range of the data between the valley and the peak (vp)
         time_range_vp = time[i_min_pp:index_range_pp[-1]]
         sig_range_vp  =  sig[i_min_pp:index_range_pp[-1]]
-        i_valleys
-                
+        #i_valleys
+        
+        #time_range_pv = time[index_range_pp[0]:i_min_pp]
+        #sig_range_pv = sig[index_range_pp[0]:i_min_pp]
+        
         i_valleys.append(i_min_pp)
+        
+        
         
         # fit a curve through the signal and find inflection points
         infl_p_time_i, infl_p_flow_i = createFit(time_range_vp,sig_range_vp,SmoothingParam,plotflag)
+        #infl_p_time_i, infl_p_flow_i = createFit(time_range_pv,sig_range_pv,SmoothingParam,plotflag)
+
         infl_p_time.append(infl_p_time_i)
         infl_p_flow.append(infl_p_flow_i)
+    
+    # Fit a spline through the smoothed data    
+    spline_model = interpolate.UnivariateSpline(t_flow,flow_filt,s = 0)
+    # Get the second derivative
+    d2 = derivative(spline_model,x0 = t_flow,n = 2,dx = 15/fs)   
     
     
     return i_valleys,infl_p_time,infl_p_flow
@@ -268,16 +280,23 @@ fs = 1.0/(t_flow[1] - t_flow[0])
 i_peaks, volume = breath_detect_coarse(flow,fs,False)
     
 # Detect inflection points in the flow signal in each breath
-flow_filt = zerophase_lowpass(flow,lf = 2,fs = fs)
+flow_filt = zerophase_lowpass(flow,lf = 1,fs = fs)
 
-plt.figure()
+# Copy the plots from the paper
+plt.figure(figsize = (15,15))
+plt.subplot(3,1,1)
 i_valleys,infl_p_time,infl_p_flow = Breath_detection(t_flow,flow,fs,num=2,SmoothingParam = 0,filterflag=True,plotflag = True)
 
 
-
 #%%
+
+#plot a spline through all the valleys
+
+v_drift = zerophase_lowpass(volume,lf = 0.01,fs = fs)
+v_corr = volume-v_drift
+
 # Copy the plots from the paper
-plt.figure(figsize = (15,15))
+#plt.figure(figsize = (15,15))
 
 #plt.subplot(3,1,1)
 #plt.plot(t_pepi,pepi)
@@ -288,24 +307,41 @@ plt.figure(figsize = (15,15))
 
 plt.subplot(3,1,1)
 plt.plot(t_flow,flow)
-#plt.plot(t_flow,flow_filt)
-plt.plot(infl_p_time,infl_p_flow,'r*')
+plt.plot(t_flow,flow_filt)
+#plt.plot(infl_p_time,infl_p_flow,'r*')
 plt.xlabel('time (s)')
 plt.ylabel('flow (L/s)')
-#plt.axis([20,60,-1.25,0.6])
+plt.axis([0,70,-2,1.5])
 plt.grid('on')
 
+# plot the second derivative of the whole thing
+spline_model = interpolate.UnivariateSpline(t_flow,flow_filt,s = 0)
+# Get the second derivative
+d2 = derivative(spline_model,x0 = t_flow,n = 2,dx = 15/fs)
+plt.subplot(3,1,2)
+plt.plot(t_flow,d2)
+plt.axis([0,70,-15,15])
+plt.grid('on')
 
+"""
 plt.plot(t_flow[i_peaks],flow[i_peaks],'ro')
 plt.plot(t_flow[i_valleys],flow[i_valleys],'g^')
 
 plt.subplot(3,1,2)
 plt.plot(t_flow,volume)
+plt.plot(t_flow[i_valleys],volume[i_valleys],'ro')
+plt.plot(t_flow,v_drift)
 #plt.axis([20,60,0,2])
 plt.grid('on')
 plt.xlabel('time (s)')
 plt.ylabel('volume (L)')
-
+"""
+plt.subplot(3,1,3)
+plt.plot(t_flow,v_corr)
+#plt.axis([20,60,0,2])
+plt.grid('on')
+plt.xlabel('time (s)')
+plt.ylabel('corrected volume (L)')
 
 
 plt.tight_layout()
