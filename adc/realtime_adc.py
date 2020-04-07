@@ -19,6 +19,7 @@ import os
 from random import randint
 import board
 import busio
+from datetime import datetime
 from scipy.interpolate import interp1d
 
 i2c = busio.I2C(board.SCL,board.SDA)
@@ -54,20 +55,21 @@ class MainWindow(QtWidgets.QMainWindow):
         
         # Set the label properties with valid CSS commands -- https://groups.google.com/forum/#!topic/pyqtgraph/jS1Ju8R6PXk
         labelStyle = {'color': '#FFF', 'font-size': '24pt'}
-        self.graphWidget.setLabel('bottom', 'Label Text', 'Units', **labelStyle)
-        self.graphWidget.setLabel('left', 'Temperature (°C)',**labelStyle)
+        self.graphWidget.setLabel('bottom', '', 'Units', **labelStyle)
+        self.graphWidget.setLabel('left', 'Flow (L/m)',**labelStyle)
         
         # change the plot range
         #self.graphWidget.setXRange(5,10,padding = 0.1)
         #self.graphWidget.setYRange(30,40,padding = 0.1)
                                              
         self.x  = [0]
-        self.y = [chan.voltage]
+        self.t = datetime.utcnow()
+        self.y = [honeywell_v2f(chan.voltage)]
 
         # plot data: x, y values
         # make a QPen object to hold the marker properties
         pen = pg.mkPen(color = 'y',width = 1)
-        self.data_line = self.graphWidget.plot(self.x, self.y,pen = pen)
+        self.data_line = self.graphWidget.plot(self.t, self.y,pen = pen)
         
         t_update = 10 #update time of timer in ms
         self.timer = QtCore.QTimer()
@@ -82,11 +84,12 @@ class MainWindow(QtWidgets.QMainWindow):
         if len(self.x) >= Npts_to_show:
             self.x = self.x[1:] # Remove the first element
             self.y = self.y[1:] # remove the first element
-        
+            self.t = self.t[1:] # remove the first element
         self.x.append(self.x[-1] + 1) # add a new value 1 higher than the last
-        self.y.append( v ) # add a new random value
+        self.t.append(datetime.utcnow())
+        self.y.append( honeywell_v2f(v) ) # add a new random value
         
-        self.data_line.setData(self.x,self.y) #update the data
+        self.data_line.setData(self.t,self.y) #update the data
         
         
 def main():
