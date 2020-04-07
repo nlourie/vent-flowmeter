@@ -19,6 +19,7 @@ import os
 from random import randint
 import board
 import busio
+from scipy.interpolate import interp1d
 
 i2c = busio.I2C(board.SCL,board.SDA)
 
@@ -29,6 +30,12 @@ from adafruit_ads1x15.analog_in import AnalogIn
 ads = ADS.ADS1115(i2c)
 
 chan = AnalogIn(ads,ADS.P3)
+
+#Honeywell Volts to FLow calibration
+
+f = [0.,25.,50.,75.,100.,150.,200.]
+v = [1,2.99,3.82,4.3,4.58,4.86,5.0]
+honeywell_v2f = interp1d(v,f,kind = 'cubic')
 
 
 
