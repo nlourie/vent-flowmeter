@@ -32,8 +32,8 @@ i2c = busio.I2C(board.SCL, board.SDA)
         # 92 (0x5c - if you put jumper from SDO to Gnd)
         # 93 (0x5d - default)
         
-p1 = adafruit_lps35hw.LPS35HW(i2c, address = 92)
-p2 = adafruit_lps35hw.LPS35HW(i2c, address = 93)
+p2 = adafruit_lps35hw.LPS35HW(i2c, address = 92)
+p1 = adafruit_lps35hw.LPS35HW(i2c, address = 93)
 
 p1.data_rate = adafruit_lps35hw.DataRate.RATE_75_HZ
 p2.data_rate = adafruit_lps35hw.DataRate.RATE_75_HZ
@@ -41,7 +41,7 @@ mbar2cmh20 = 0.980665
 
 
 # Now read out the pressure difference between the sensors
-
+dp0 = p1.pressure - p2.pressure
 
 
 
@@ -91,13 +91,13 @@ class MainWindow(QtWidgets.QMainWindow):
         self.t = [datetime.utcnow()]
         self.dt = [0]
         #self.y = [honeywell_v2f(chan.voltage)]
-        self.dp = [p1.pressure - p2.pressure]*mbar2cmh20
-        self.p = [p1.pressure]
+        self.dp = [((p1.pressure - p2.pressure)-dp0)*mbar2cmh20]
+        self.p = [p1.pressure*mbar2cmh20]
         
         # plot data: x, y values
         # make a QPen object to hold the marker properties
         pen = pg.mkPen(color = 'y',width = 1)
-        self.data_line = self.graphWidget.plot(self.dt, self.y,pen = pen)
+        self.data_line = self.graphWidget.plot(self.dt, self.dp,pen = pen)
         
         self.t_update = 10 #update time of timer in ms
         self.timer = QtCore.QTimer()
@@ -122,10 +122,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.t.append(datetime.utcnow())
         self.dt = [float((ti - self.t[0]).total_seconds()) for ti in self.t]
         #self.y.append( honeywell_v2f(v) ) # add a new random value
-        self.dp.append((p1.pressure - p2.pressure)*mbar2cmh20)
-        self.p.append(p1.presure*mbar2cmh20)
+        self.dp.append(((p1.pressure - p2.pressure)-dp0)*mbar2cmh20)
+        self.p.append(p1.pressure*mbar2cmh20)
         
-        self.data_line.setData(self.dt,self.y) #update the data
+        self.data_line.setData(self.dt,self.dp) #update the data
         
         
 def main():
