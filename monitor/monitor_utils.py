@@ -216,8 +216,6 @@ if __name__ == '__main__':
     # Import data
     time,rawflow = np.loadtxt('data.txt',skiprows = 100,delimiter = '\t',unpack = True)
     fs = 1/(time[1] - time[0] )
-        
-    #time = list(time)
-    #rawflow = list(rawflow)
+    
     i_peaks,i_valleys,i_infl_points,vol_last_peak,vol_corr = get_processed_flow(time,rawflow,fs,SmoothingParam = 0,smoothflag=True,plotflag = True)
     

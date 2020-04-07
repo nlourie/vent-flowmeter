@@ -19,15 +19,28 @@ import os
 from datetime import datetime
 from random import randint
 import numpy as np
+import monitor_utils_test as mu
 
 class MainWindow(QtWidgets.QMainWindow):
 
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
+        self.setWindowTitle("Standalone Respiratory Monitor")
+        self.graph1 = pg.PlotWidget()
+        self.graph2 = pg.PlotWidget()
+        self.graph3 = pg.PlotWidget()
+        
+        layout = QtWidgets.QVBoxLayout()
+        layout.addWidget(self.graph1)
+        layout.addWidget(self.graph2)
+        layout.addWidget(self.graph3)
+        
+        widget = QtWidgets.QWidget()
+        widget.setLayout(layout)
         
         # make the window with a graph widget
-        self.graph1 = pg.PlotWidget()
-        self.setCentralWidget(self.graph1)
+        #self.graph1 = pg.PlotWidget()
+        self.setCentralWidget(widget)
         
         # set the plot properties
         self.graph1.setBackground('k')
@@ -52,9 +65,18 @@ class MainWindow(QtWidgets.QMainWindow):
         pen = pg.mkPen(color = 'y',width = 1)
         self.data_line = self.graph1.plot(self.dt, self.y,pen = pen)
         
-        t_update = 10 #update time of timer in ms
+        # graph3
+        self.vol = [0]
+        
+        self.data_line3 = self.graph3.plot(self.dt,self.vol,pen = pen)
+        
+        
+        
+        
+        # Stuff with the timer
+        self.t_update = 10 #update time of timer in ms
         self.timer = QtCore.QTimer()
-        self.timer.setInterval(t_update)
+        self.timer.setInterval(self.t_update)
         self.timer.timeout.connect(self.update_plot_data)
         self.timer.start()
         
@@ -66,6 +88,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.y = self.y[1:] # remove the first element
             self.t = self.t[1:]
             self.dt = self.dt[1:]
+            #self.vol = self.vol[1:]
             
         self.x.append(self.x[-1] + 1) # add a new value 1 higher than the last
         self.y.append( randint(0,100)) # add a new random value
@@ -73,6 +96,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dt = [float((ti - self.t[0]).total_seconds()) for ti in self.t]
         
         self.data_line.setData(self.dt,self.y) #update the data
+        
+        if len(self.x) >= 10: 
+            # try to run the monitor utils functions
+            fs = 1000/self.t_update
+            i_peaks,i_valleys,i_infl_points,vol_last_peak,vol_corr = mu.get_processed_flow(np.array(self.dt),np.array(self.y),fs,SmoothingParam = 0,smoothflag=True,plotflag = False)
+            self.vol = list[vol_corr]
+            print('corrected volume last = ',self.vol[-1])
+            self.data_line3.setData(self.dt,self.vol)
         
         
 def main():
