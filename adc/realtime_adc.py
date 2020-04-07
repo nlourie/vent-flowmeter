@@ -1,0 +1,94 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Apr  7 08:38:28 2020
+
+pyqt realtime plot tutorial
+
+source: https://www.learnpyqt.com/courses/graphics-plotting/plotting-pyqtgraph/
+
+
+@author: nlourie
+"""
+
+from PyQt5 import QtWidgets, QtCore,uic
+from pyqtgraph import PlotWidget, plot,QtGui
+import pyqtgraph as pg
+import sys  # We need sys so that we can pass argv to QApplication
+import os
+from random import randint
+import board
+import busio
+
+i2c = busio.I2C(board.SCL,board.SDA)
+
+import adafruit_ads1x15.ads1115 as ADS
+
+from adafruit_ads1x15.analog_in import AnalogIn
+
+ads = ADS.ADS1115(i2c)
+
+chan = AnalogIn(ads,ADS.P3)
+
+
+
+class MainWindow(QtWidgets.QMainWindow):
+
+    def __init__(self, *args, **kwargs):
+        super(MainWindow, self).__init__(*args, **kwargs)
+        
+        # make the window with a graph widget
+        self.graphWidget = pg.PlotWidget()
+        self.setCentralWidget(self.graphWidget)
+        
+        # set the plot properties
+        self.graphWidget.setBackground('k')
+        self.graphWidget.showGrid(x=True,y=True)
+        
+        # Set the label properties with valid CSS commands -- https://groups.google.com/forum/#!topic/pyqtgraph/jS1Ju8R6PXk
+        labelStyle = {'color': '#FFF', 'font-size': '24pt'}
+        self.graphWidget.setLabel('bottom', 'Label Text', 'Units', **labelStyle)
+        self.graphWidget.setLabel('left', 'Temperature (°C)',**labelStyle)
+        
+        # change the plot range
+        #self.graphWidget.setXRange(5,10,padding = 0.1)
+        #self.graphWidget.setYRange(30,40,padding = 0.1)
+                                             
+        self.x  = [0]
+        self.y = [chan.voltage]
+
+        # plot data: x, y values
+        # make a QPen object to hold the marker properties
+        pen = pg.mkPen(color = 'y',width = 1)
+        self.data_line = self.graphWidget.plot(self.x, self.y,pen = pen)
+        
+        t_update = 10 #update time of timer in ms
+        self.timer = QtCore.QTimer()
+        self.timer.setInterval(t_update)
+        self.timer.timeout.connect(self.update_plot_data)
+        self.timer.start()
+        
+    def update_plot_data(self):
+        # This is what happens every timer loop
+        v = chan.voltage
+        Npts_to_show = 1000
+        if len(self.x) >= Npts_to_show:
+            self.x = self.x[1:] # Remove the first element
+            self.y = self.y[1:] # remove the first element
+        
+        self.x.append(self.x[-1] + 1) # add a new value 1 higher than the last
+        self.y.append( v ) # add a new random value
+        
+        self.data_line.setData(self.x,self.y) #update the data
+        
+        
+def main():
+    app = QtWidgets.QApplication(sys.argv)
+    main = MainWindow()
+    main.show()
+    sys.exit(app.exec_())
+
+
+if __name__ == '__main__':
+    main()
+
