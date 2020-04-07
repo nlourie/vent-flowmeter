@@ -63,8 +63,8 @@ class MainWindow(QtWidgets.QMainWindow):
         #self.graphWidget.setYRange(30,40,padding = 0.1)
                                              
         self.x  = [0]
-        self.t = np.array([datetime.utcnow()])
-        self.dt =t 
+        self.t = [datetime.utcnow()]
+        self.dt = [0]
         self.y = [honeywell_v2f(chan.voltage)]
 
         # plot data: x, y values
@@ -86,8 +86,10 @@ class MainWindow(QtWidgets.QMainWindow):
             self.x = self.x[1:] # Remove the first element
             self.y = self.y[1:] # remove the first element
             self.t = self.t[1:] # remove the first element
+            self.dt= self.dt[1:]
         self.x.append(self.x[-1] + 1) # add a new value 1 higher than the last
-        self.t.append(float(self.x[-1] + 1)/(1000.0/self.t_update))
+        self.t.append(datetime.utcnow())
+        self.dt = [float((ti - self.t[0]).total_seconds()) for ti in self.t]
         self.y.append( honeywell_v2f(v) ) # add a new random value
         
         self.data_line.setData(self.t,self.y) #update the data

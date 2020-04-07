@@ -16,7 +16,9 @@ from pyqtgraph import PlotWidget, plot,QtGui
 import pyqtgraph as pg
 import sys  # We need sys so that we can pass argv to QApplication
 import os
+from datetime import datetime
 from random import randint
+import numpy as np
 
 class MainWindow(QtWidgets.QMainWindow):
 
@@ -40,13 +42,15 @@ class MainWindow(QtWidgets.QMainWindow):
         #self.graphWidget.setXRange(5,10,padding = 0.1)
         #self.graphWidget.setYRange(30,40,padding = 0.1)
                                              
-        self.x  = [0] 
+        self.x  = [0]
+        self.t = [datetime.utcnow()]
+        self.dt = [0]
         self.y = [randint(0,100)]
 
         # plot data: x, y values
         # make a QPen object to hold the marker properties
         pen = pg.mkPen(color = 'y',width = 1)
-        self.data_line = self.graphWidget.plot(self.x, self.y,pen = pen)
+        self.data_line = self.graphWidget.plot(self.dt, self.y,pen = pen)
         
         t_update = 10 #update time of timer in ms
         self.timer = QtCore.QTimer()
@@ -60,11 +64,15 @@ class MainWindow(QtWidgets.QMainWindow):
         if len(self.x) >= Npts_to_show:
             self.x = self.x[1:] # Remove the first element
             self.y = self.y[1:] # remove the first element
-        
+            self.t = self.t[1:]
+            self.dt = self.dt[1:]
+            
         self.x.append(self.x[-1] + 1) # add a new value 1 higher than the last
         self.y.append( randint(0,100)) # add a new random value
+        self.t.append(datetime.utcnow())
+        self.dt = [float((ti - self.t[0]).total_seconds()) for ti in self.t]
         
-        self.data_line.setData(self.x,self.y) #update the data
+        self.data_line.setData(self.dt,self.y) #update the data
         
         
 def main():
