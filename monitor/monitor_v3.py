@@ -148,12 +148,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.p.append(p1.pressure*mbar2cmh20)
         
         self.data_line.setData(self.dt,self.dp) #update the data
-        
-        
-        if len(self.x) >= 10: 
+        #print('type of dt = ',type(self.dt))
+        #print('type of np(dt) = ',type(np.array(self.dt)))
+        if len(self.x) >= 100: 
             # try to run the monitor utils functions
             fs = 1000/self.t_update
-            i_peaks,i_valleys,i_infl_points,vol_last_peak,vol_corr = mu.get_processed_flow(np.array(self.dt),np.array(self.y),fs,SmoothingParam = 0,smoothflag=True,plotflag = False)
+            i_peaks,i_valleys,i_infl_points,vol_last_peak,vol_corr = mu.get_processed_flow(np.array(self.dt),np.array(self.dp),fs,SmoothingParam = 0,smoothflag=True,plotflag = False)
             self.vol = list[vol_corr]
             #print('corrected volume last = ',self.vol[-1])
             self.data_line3.setData(self.dt,self.vol)
