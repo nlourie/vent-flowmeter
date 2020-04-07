@@ -22,6 +22,7 @@ import busio
 from datetime import datetime
 from scipy.interpolate import interp1d
 import adafruit_lps35hw
+import numpy as np
 
 import monitor_utils as mu
 
@@ -114,6 +115,12 @@ class MainWindow(QtWidgets.QMainWindow):
         pen = pg.mkPen(color = 'y',width = 1)
         self.data_line = self.graph1.plot(self.dt, self.dp,pen = pen)
         
+        # graph3
+        self.vol = [0]
+        self.data_line3 = self.graph3.plot(self.dt,self.vol,pen = pen)
+        
+        
+        
         self.t_update = 10 #update time of timer in ms
         self.timer = QtCore.QTimer()
         self.timer.setInterval(self.t_update)
@@ -142,6 +149,14 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.data_line.setData(self.dt,self.dp) #update the data
         
+        
+        if len(self.x) >= 10: 
+            # try to run the monitor utils functions
+            fs = 1000/self.t_update
+            i_peaks,i_valleys,i_infl_points,vol_last_peak,vol_corr = mu.get_processed_flow(np.array(self.dt),np.array(self.y),fs,SmoothingParam = 0,smoothflag=True,plotflag = False)
+            self.vol = list[vol_corr]
+            #print('corrected volume last = ',self.vol[-1])
+            self.data_line3.setData(self.dt,self.vol)
         
 def main():
     app = QtWidgets.QApplication(sys.argv)
