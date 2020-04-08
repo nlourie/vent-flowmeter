@@ -17,10 +17,38 @@ import pyqtgraph as pg
 import sys  # We need sys so that we can pass argv to QApplication
 import os
 from datetime import datetime
-from random import randint
 import numpy as np
-import monitor_utils_test as mu
 from scipy import signal
+import board
+import busio
+import adafruit_lps35hw
+
+#import monitor_utils as mu
+
+# Initialize the i2c bus
+i2c = busio.I2C(board.SCL, board.SDA)
+
+# Using the adafruit_lps35hw class to read in the pressure sensor
+    # note the address must be in decimal.
+    # allowed addresses are: 
+        # 92 (0x5c - if you put jumper from SDO to Gnd)
+        # 93 (0x5d - default)
+        
+p2 = adafruit_lps35hw.LPS35HW(i2c, address = 92)
+p1 = adafruit_lps35hw.LPS35HW(i2c, address = 93)
+
+p1.data_rate = adafruit_lps35hw.DataRate.RATE_75_HZ
+p2.data_rate = adafruit_lps35hw.DataRate.RATE_75_HZ
+mbar2cmh20 = 0.980665
+
+
+# Now read out the pressure difference between the sensors
+dp0 = p1.pressure - p2.pressure
+
+
+
+
+
 
 def breath_detect_coarse(flow,fs,plotflag = False):
     """
@@ -105,7 +133,17 @@ class MainWindow(QtWidgets.QMainWindow):
         self.x  = [0]
         self.t = [datetime.utcnow().timestamp()]
         self.dt = [0]
-        self.y = [0]
+
+        self.x  = [0]
+        self.t = [datetime.utcnow()]
+        self.dt = [0]
+        #self.y = [honeywell_v2f(chan.voltage)]
+        self.dp = [((p1.pressure - p2.pressure)-dp0)*mbar2cmh20]
+        self.p = [p1.pressure*mbar2cmh20]
+        self.flow = [0]
+        
+
+
 
         # plot data: x, y values
         # make a QPen object to hold the marker properties
@@ -113,7 +151,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.data_line = self.graph1.plot(self.dt, self.y,pen = pen)
         
         # graph2
-        self.flow = [0]
+        
         self.data_line2 = self.graph2.plot(self.dt,self.flow,pen = pen)
         # graph3
         self.vol = [0]
@@ -144,24 +182,31 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.drift_model = [0,datetime.utcnow().timestamp()/1000*self.t_update]
         self.i_valleys = []
+        self.time_to_show = 60 #s
         
     def update_plot_data(self):
         # This is what happens every timer loop
-        Npts_to_show = 2000
-        if len(self.x) >= Npts_to_show:
+        
+        if self.dt[-1] >= self.time_to_show:
             self.x = self.x[1:] # Remove the first element
-            self.y = self.y[1:] # remove the first element
-            self.t = self.t[1:]
-            self.dt = self.dt[1:]
+            #self.y = self.y[1:] # remove the first element
+            self.dp = self.dp[1:]
+            self.t = self.t[1:] # remove the first element
+            self.dt= self.dt[1:]
+            self.p = self.p[1:]
             self.vol = self.vol[1:]
             
-            
+        
         self.x.append(self.x[-1] + 1) # add a new value 1 higher than the last
-        self.y.append( np.sin(self.x[-1]*(1/(60)))+0.3*np.sin(self.x[-1]*(1/(6000))) )# add a new random value
         self.t.append(datetime.utcnow().timestamp())
         self.dt = [(ti - self.t[0]) for ti in self.t]
+        dp_cmh20 = ((p1.pressure - p2.pressure)-dp0)*mbar2cmh20
+        self.dp.append(dp_cmh20)
+        self.flow.append(dp_cmh20)
         
-        self.vol = np.cumsum(self.y)
+        self.p.append(p1.pressure*mbar2cmh20)
+        self.vol = np.cumsum(self.flow)
+        
         try:
             negative_mean_subtracted_volume = [-1*(v-np.mean(self.vol)) for v in self.vol]
             i_valleys = breath_detect_coarse(negative_mean_subtracted_volume,fs = 1000/self.t_update,plotflag = False)
@@ -184,7 +229,7 @@ class MainWindow(QtWidgets.QMainWindow):
             
         else:
             self.vol_corr = self.vol
-        self.data_line.setData(self.dt,self.y) #update the data
+        self.data_line.setData(self.dt,self.flow) #update the data
 
         #self.data_line2.setData(self.dt,list(np.array(self.vol - np.polyval(self.drift_model,self.t))))
         self.data_line2.setData(self.dt,self.vol)

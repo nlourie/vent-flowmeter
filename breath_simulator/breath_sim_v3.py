@@ -167,7 +167,11 @@ def get_processed_flow(time,rawflow,fs,SmoothingParam,smoothflag = True,plotflag
     vol = np.cumsum(flow)/fs
     drift_model = interpolate.interp1d(time[i_to_fit],vol[i_to_fit],kind = 'cubic')
     vol_drift = drift_model(time)
-        
+     
+    #try a linear correction
+    #drift_lin_fit = np.polyfit(time[i_to_fit],vol[i_to_fit],5)
+    #vol_drift = np.polyval(drift_lin_fit,time)
+    
     vol_corr = vol - vol_drift
     
     ## Step 7: Get the last tidal volume
@@ -200,10 +204,10 @@ def get_processed_flow(time,rawflow,fs,SmoothingParam,smoothflag = True,plotflag
         plt.legend()
         
         plt.subplot(3,1,3)
-        plt.plot(time,vol_corr,label = 'Corrected Volume')
-        plt.plot(time[i_infl_points],vol_corr[i_infl_points],'k*',label = 'Start of Breath')
-        plt.plot(time[i_last_peak],vol_corr[i_last_peak],'g^',label = 'Last VT = %0.2f L' %vol_last_peak)
-        plt.plot(time[i_since_last_breath],vol_corr[i_since_last_breath],label = 'Last Breath')
+        plt.plot(time,vol,label = 'Corrected Volume')
+        plt.plot(time[i_infl_points],vol[i_infl_points],'k*',label = 'Start of Breath')
+        plt.plot(time[i_last_peak],vol[i_last_peak],'g^',label = 'Last VT = %0.2f L' %vol_last_peak)
+        plt.plot(time[i_since_last_breath],vol[i_since_last_breath],label = 'Last Breath')
         plt.xlabel('time (s)',fontsize = 14)
         plt.ylabel('Tidal Volume (L)',fontsize = 14)
         plt.legend()
