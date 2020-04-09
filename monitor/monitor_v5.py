@@ -106,7 +106,7 @@ def breath_detect_coarse(flow,fs,plotflag = False):
                                     prominence = minpeakprominence,
                                     width = minpeakwidth)
     """
-    print('found peaks at index = ',peak_index)
+    #print('found peaks at index = ',peak_index)
     return peak_index
 
 
@@ -148,8 +148,8 @@ class MainWindow(QtWidgets.QMainWindow):
 
         # change the plot range
         self.graph0.setYRange(-30,30,padding = 0.1)
-        self.graph1.setYRange(-2,2,padding = 0.1)
-        self.graph3.setYRange(-0.5,1.5,padding = 0.1)
+        self.graph1.setYRange(-1.5,1.5,padding = 0.1)
+        self.graph3.setYRange(-1,5,padding = 0.1)
         #self.graph3.setYRange(200,200,padding = 0.1)
                                              
         self.x  = [0]
@@ -165,8 +165,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.flow = [0]
         self.vol = [0]
         
-        print('P1 = ',p1.pressure,' cmH20')
-        print('P2 = ',p2.pressure,' cmH20')
+        #print('P1 = ',p1.pressure,' cmH20')
+        #print('P2 = ',p2.pressure,' cmH20')
 
 
         # plot data: x, y values
@@ -242,7 +242,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.vol = signal.detrend(np.cumsum(self.flow))
         
         self.fs = 1/(self.t[-1] - self.t[-2])
-        print('Sample Freq = ',self.fs)
+        #print('Sample Freq = ',self.fs)
 
         negative_mean_subtracted_volume = [-1*(v-np.mean(self.vol)) for v in self.vol]
         i_valleys = breath_detect_coarse(negative_mean_subtracted_volume,fs = self.fs,plotflag = False)
@@ -256,7 +256,7 @@ class MainWindow(QtWidgets.QMainWindow):
             t = np.array(self.t)
             vol = np.array(self.vol)
             dt = np.array(self.dt)
-            print('found peaks at dt = ',dt[self.i_valleys])
+            #print('found peaks at dt = ',dt[self.i_valleys])
             self.drift_model = np.polyfit(t[self.i_valleys],vol[self.i_valleys],1)
             self.v_drift = np.polyval(self.drift_model,t)
             self.vol_corr = vol - self.v_drift
