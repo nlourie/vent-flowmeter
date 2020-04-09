@@ -41,8 +41,8 @@ mbar2cmh20 = 1.0/0.980665
 
 
 # Now read out the pressure difference between the sensors
-p1.zeropressure()
-p2.zeropressure()
+p1.zero_pressure()
+p2.zero_pressure()
 dp0 = p1.pressure - p2.pressure
 
 
