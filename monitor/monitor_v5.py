@@ -179,8 +179,8 @@ class MainWindow(QtWidgets.QMainWindow):
         
         # graph2
         
-        self.data_line21 = self.graph2.plot(self.dt,self.flow,pen = pen)
-        self.data_line22 = self.graph2.plot(self.dt,self.flow,pen = pen)
+        #self.data_line21 = self.graph2.plot(self.dt,self.flow,pen = pen)
+        #self.data_line22 = self.graph2.plot(self.dt,self.flow,pen = pen)
         # graph3
         
         
