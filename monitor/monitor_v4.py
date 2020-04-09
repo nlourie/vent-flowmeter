@@ -123,10 +123,12 @@ class MainWindow(QtWidgets.QMainWindow):
         self.graph1.showGrid(x=True,y=True)
         
         # Set the label properties with valid CSS commands -- https://groups.google.com/forum/#!topic/pyqtgraph/jS1Ju8R6PXk
-        labelStyle = {'color': '#FFF', 'font-size': '24pt'}
-        self.graph1.setLabel('bottom', 'Label Text', 'Units', **labelStyle)
-        self.graph1.setLabel('left', 'Temperature (°C)',**labelStyle)
-        
+        labelStyle = {'color': '#FFF', 'font-size': '12pt'}
+        self.graph1.setLabel('left','Flow','L/s',**labelStyle)
+        self.graph3.setLabel('bottom', 'Time', 's', **labelStyle)
+        self.graph2.setLabel('left', 'V raw','L',**labelStyle)
+        self.graph3.setLabel('left','V corr','L',**labelStyle)
+
         # change the plot range
         #self.graph2.setYRange(-200,200,padding = 0.1)
         #self.graph3.setYRange(200,200,padding = 0.1)
@@ -141,6 +143,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dp = [((p1.pressure - p2.pressure)-dp0)*mbar2cmh20]
         self.p = [(p1.pressure-p10)*mbar2cmh20]
         self.flow = [0]
+        self.vol = [0]
         
         print('raw pressure = ',p1.pressure)
 
@@ -148,19 +151,19 @@ class MainWindow(QtWidgets.QMainWindow):
         # plot data: x, y values
         # make a QPen object to hold the marker properties
         pen = pg.mkPen(color = 'y',width = 1)
-        self.data_line = self.graph1.plot(self.dt, self.p,pen = pen)
+        self.data_line1 = self.graph1.plot(self.dt, self.flow,pen = pen)
         
         # graph2
         
-        self.data_line2 = self.graph2.plot(self.dt,self.flow,pen = pen)
+        self.data_line21 = self.graph2.plot(self.dt,self.flow,pen = pen)
+        self.data_line22 = self.graph2.plot(self.dt,self.flow,pen = pen)
         # graph3
-        self.vol = [0]
+        
         
         self.data_line3 = self.graph3.plot(self.dt,self.vol,pen = pen)
-        self.data_line4 = self.graph3.plot(self.dt,self.vol,pen = pen)
-        self.data_line5 = self.graph2.plot([0],[0],pen = pen)
+
         self.calibrating = False
-        self.vol_offset = 0
+
         
         """
         # Slower timer
@@ -209,14 +212,13 @@ class MainWindow(QtWidgets.QMainWindow):
         # THis should zero it out okay if there's no noticeable "dips"
         self.vol = signal.detrend(np.cumsum(self.flow))
         
-        try:
-            negative_mean_subtracted_volume = [-1*(v-np.mean(self.vol)) for v in self.vol]
-            i_valleys = breath_detect_coarse(negative_mean_subtracted_volume,fs = 1000/self.t_update,plotflag = False)
-            self.i_valleys = i_valleys
+        negative_mean_subtracted_volume = [-1*(v-np.mean(self.vol)) for v in self.vol]
+        i_valleys = breath_detect_coarse(negative_mean_subtracted_volume,fs = 1000/self.t_update,plotflag = False)
+        self.i_valleys = i_valleys
+            
             #print('i_valleys = ',self.i_valleys)
             #print('datatype of i_valleys = ',type(self.i_valleys))
-        except:
-            pass
+
         
         if len(self.i_valleys) >= 2:
             t = np.array(self.t)
@@ -226,19 +228,16 @@ class MainWindow(QtWidgets.QMainWindow):
             self.drift_model = np.polyfit(t[self.i_valleys],vol[self.i_valleys],1)
             self.v_drift = np.polyval(self.drift_model,t)
             self.vol_corr = vol - self.v_drift
-            self.data_line5.setData(self.dt,self.v_drift)
+            self.data_line22.setData(self.dt,self.v_drift)
 
             
         else:
             self.vol_corr = self.vol
-        self.data_line.setData(self.dt,self.p) #update the data
+        self.data_line.setData1(self.dt,self.flow) #update the data
 
-        #self.data_line2.setData(self.dt,list(np.array(self.vol - np.polyval(self.drift_model,self.t))))
-        self.data_line2.setData(self.dt,self.flow)
+        self.data_line21.setData(self.dt,self.vol)
         self.data_line3.setData(self.dt,self.vol_corr)
-        self.data_line4.setData(self.dt,self.vol)
-        #self.data_line4.setData(self.dt,np.polyval(self.drift_model,self.t))
-        #self.data_line3.setData(self.dt,self.vol - np.polyval(self.drift_model,self.t))
+        
 
 
     """        

@@ -22,6 +22,7 @@ import numpy as np
 import monitor_utils_test as mu
 from scipy import signal
 
+
 def breath_detect_coarse(flow,fs,plotflag = False):
     """
     %% This function detects peaks of flow signal
@@ -66,6 +67,7 @@ def breath_detect_coarse(flow,fs,plotflag = False):
     """
     print('found peaks at index = ',peak_index)
     return peak_index
+
 
 
 class MainWindow(QtWidgets.QMainWindow):
