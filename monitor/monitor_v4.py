@@ -39,16 +39,17 @@ p1 = adafruit_lps35hw.LPS35HW(i2c, address = 93)
 
 p1.data_rate = adafruit_lps35hw.DataRate.RATE_75_HZ
 p2.data_rate = adafruit_lps35hw.DataRate.RATE_75_HZ
-mbar2cmh20 = 0.980665
+mbar2cmh20 = 1.01972
 
 
 # Now read out the pressure difference between the sensors
 dp0 = p1.pressure - p2.pressure
 
+p10 = p1.pressure
 
 
-
-
+print('p1_0 = ',p1.pressure,' mbar')
+print('p1_0 = ',p1.pressure*mbar2cmh20,' cmH20')
 
 def breath_detect_coarse(flow,fs,plotflag = False):
     """
@@ -76,7 +77,7 @@ def breath_detect_coarse(flow,fs,plotflag = False):
     # detect peaks of flow signal
     minpeakwidth = fs*0.3
     peakdistance = fs*1.5
-    print('peakdistance = ',peakdistance)
+    #print('peakdistance = ',peakdistance)
     minPeak = 0.05 # flow threshold = 0.05 (L/s)
     minpeakprominence = 0.05
     
@@ -135,20 +136,19 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dt = [0]
 
         self.x  = [0]
-        self.t = [datetime.utcnow()]
         self.dt = [0]
         #self.y = [honeywell_v2f(chan.voltage)]
         self.dp = [((p1.pressure - p2.pressure)-dp0)*mbar2cmh20]
-        self.p = [p1.pressure*mbar2cmh20]
+        self.p = [(p1.pressure-p10)*mbar2cmh20]
         self.flow = [0]
         
-
+        print('raw pressure = ',p1.pressure)
 
 
         # plot data: x, y values
         # make a QPen object to hold the marker properties
         pen = pg.mkPen(color = 'y',width = 1)
-        self.data_line = self.graph1.plot(self.dt, self.y,pen = pen)
+        self.data_line = self.graph1.plot(self.dt, self.p,pen = pen)
         
         # graph2
         
@@ -204,14 +204,14 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dp.append(dp_cmh20)
         self.flow.append(dp_cmh20)
         
-        self.p.append(p1.pressure*mbar2cmh20)
+        self.p.append((p1.pressure-p10)*mbar2cmh20)
         self.vol = np.cumsum(self.flow)
         
         try:
             negative_mean_subtracted_volume = [-1*(v-np.mean(self.vol)) for v in self.vol]
             i_valleys = breath_detect_coarse(negative_mean_subtracted_volume,fs = 1000/self.t_update,plotflag = False)
             self.i_valleys = i_valleys
-            print('i_valleys = ',self.i_valleys)
+            #print('i_valleys = ',self.i_valleys)
             #print('datatype of i_valleys = ',type(self.i_valleys))
         except:
             pass
@@ -229,11 +229,12 @@ class MainWindow(QtWidgets.QMainWindow):
             
         else:
             self.vol_corr = self.vol
-        self.data_line.setData(self.dt,self.flow) #update the data
+        self.data_line.setData(self.dt,self.p) #update the data
 
         #self.data_line2.setData(self.dt,list(np.array(self.vol - np.polyval(self.drift_model,self.t))))
-        self.data_line2.setData(self.dt,self.vol)
+        self.data_line2.setData(self.dt,self.flow)
         self.data_line3.setData(self.dt,self.vol_corr)
+        self.data_line4.setData(self.dt,self.vol)
         #self.data_line4.setData(self.dt,np.polyval(self.drift_model,self.t))
         #self.data_line3.setData(self.dt,self.vol - np.polyval(self.drift_model,self.t))
 
