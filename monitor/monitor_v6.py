@@ -125,7 +125,7 @@ class MainWindow(QtWidgets.QMainWindow):
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self.graph0)
         layout.addWidget(self.graph1)
-        #layout.addWidget(self.graph2)
+        layout.addWidget(self.graph2)
         layout.addWidget(self.graph3)
         
         widget = QtWidgets.QWidget()
