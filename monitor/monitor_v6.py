@@ -137,7 +137,11 @@ class MainWindow(QtWidgets.QMainWindow):
         
         # set the plot properties
         self.graph1.setBackground('k')
+        self.graph0.showGrid(x = True, y = True)
         self.graph1.showGrid(x=True,y=True)
+        self.graph2.showGrid(x = True, y = True)
+        self.graph3.showGrid(x = True, y = True)
+
         
         # Set the label properties with valid CSS commands -- https://groups.google.com/forum/#!topic/pyqtgraph/jS1Ju8R6PXk
         labelStyle = {'color': '#FFF', 'font-size': '12pt'}
@@ -148,9 +152,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.graph3.setLabel('left','V corr','L',**labelStyle)
 
         # change the plot range
-        self.graph0.setYRange(-30,30,padding = 0.1)
-        self.graph1.setYRange(-2,2,padding = 0.1)
-        self.graph3.setYRange(-0.5,1.5,padding = 0.1)
+        #self.graph0.setYRange(-30,30,padding = 0.1)
+        #self.graph1.setYRange(-2,2,padding = 0.1)
+        #self.graph3.setYRange(-0.5,1.5,padding = 0.1)
         #self.graph3.setYRange(200,200,padding = 0.1)
                                              
         self.x  = [0]
