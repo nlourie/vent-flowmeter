@@ -43,13 +43,13 @@ mbar2cmh20 = 1.01972
 
 
 # Now read out the pressure difference between the sensors
-dp0 = p1.pressure - p2.pressure
-
-p10 = p1.pressure
-
+p1.zero_pressure()
+p2.zero_pressure()
 
 print('p1_0 = ',p1.pressure,' mbar')
 print('p1_0 = ',p1.pressure*mbar2cmh20,' cmH20')
+print('p2_0 = ',p1.pressure,' mbar')
+print('p2_0 = ',p1.pressure*mbar2cmh20,' cmH20')
 
 def breath_detect_coarse(flow,fs,plotflag = False):
     """
@@ -107,6 +107,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.graph3 = pg.PlotWidget()
         
         layout = QtWidgets.QVBoxLayout()
+        layout.addWidget(self.graph0)
         layout.addWidget(self.graph1)
         layout.addWidget(self.graph2)
         layout.addWidget(self.graph3)
@@ -124,6 +125,7 @@ class MainWindow(QtWidgets.QMainWindow):
         
         # Set the label properties with valid CSS commands -- https://groups.google.com/forum/#!topic/pyqtgraph/jS1Ju8R6PXk
         labelStyle = {'color': '#FFF', 'font-size': '12pt'}
+        self.graph0.setLabel('left','P','cmH20',**labelStyle)
         self.graph1.setLabel('left','Flow','L/s',**labelStyle)
         self.graph3.setLabel('bottom', 'Time', 's', **labelStyle)
         self.graph2.setLabel('left', 'V raw','L',**labelStyle)
@@ -140,17 +142,22 @@ class MainWindow(QtWidgets.QMainWindow):
         self.x  = [0]
         self.dt = [0]
         #self.y = [honeywell_v2f(chan.voltage)]
-        self.dp = [((p1.pressure - p2.pressure)-dp0)*mbar2cmh20]
-        self.p = [(p1.pressure-p10)*mbar2cmh20]
+        self.dp = [(p1.pressure - p2.pressure)*mbar2cmh20]
+        self.p1 = [(p1.pressure)*mbar2cmh20]
+        self.p2 = [(p2.pressure)*mbar2cmh20]
         self.flow = [0]
         self.vol = [0]
         
-        print('raw pressure = ',p1.pressure)
+        print('P1 = ',p1.pressure,' cmH20')
+        print('P2 = ',p2.pressure,' cmH20')
 
 
         # plot data: x, y values
         # make a QPen object to hold the marker properties
         pen = pg.mkPen(color = 'y',width = 1)
+        pen2 = pg.mkPen(color = 'b',width = 2)
+        self.data_line01 = self.graph0.plot(self.dt,self.p1,pen = pen)
+        self.data_line02 = self.graph0.plot(self.dt,self.p2,pen = pen2)
         self.data_line1 = self.graph1.plot(self.dt, self.flow,pen = pen)
         
         # graph2
@@ -199,18 +206,20 @@ class MainWindow(QtWidgets.QMainWindow):
             self.dp = self.dp[1:]
             self.t = self.t[1:] # remove the first element
             self.dt= self.dt[1:]
-            self.p = self.p[1:]
+            self.p1 = self.p1[1:]
+            self.p2 = self.p2[1:]
             self.vol = self.vol[1:]
             self.flow = self.flow[1:]
         
         self.x.append(self.x[-1] + 1) # add a new value 1 higher than the last
         self.t.append(datetime.utcnow().timestamp())
         self.dt = [(ti - self.t[0]) for ti in self.t]
-        dp_cmh20 = ((p1.pressure - p2.pressure)-dp0)*mbar2cmh20
+        dp_cmh20 = ((p1.pressure - p2.pressure))*mbar2cmh20
         self.dp.append(dp_cmh20)
         self.flow.append(dp_cmh20)
         
-        self.p.append((p1.pressure-p10)*mbar2cmh20)
+        self.p1.append(p1.pressure*mbar2cmh20)
+        self.p2.append(p2.pressure*mbar2cmh20)
         # remove any linear trend in the volume data since it's just nonsense.
         # THis should zero it out okay if there's no noticeable "dips"
         self.vol = signal.detrend(np.cumsum(self.flow))
@@ -239,6 +248,8 @@ class MainWindow(QtWidgets.QMainWindow):
             
         else:
             self.vol_corr = self.vol
+        self.data_line01.setData(self.dt,self.p1)
+        self.data_line02.setData(self.dt,self.p2)
         self.data_line1.setData(self.dt,self.flow) #update the data
 
         self.data_line21.setData(self.dt,self.vol)

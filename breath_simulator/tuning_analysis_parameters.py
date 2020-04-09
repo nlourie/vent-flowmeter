@@ -65,6 +65,7 @@ def breath_detect_coarse(flow,fs,plotflag = False):
 
 time,flow = np.loadtxt('dataset_2.txt',skiprows = 100,delimiter = '\t',unpack = True)
 fs = 1/(time[1] - time[0] )
+print('fs = ',fs)
         
 vol = signal.detrend(np.cumsum(flow))
 negative_mean_subtracted_volume = [-1*(v-np.mean(vol)) for v in vol]
