@@ -233,7 +233,7 @@ class MainWindow(QtWidgets.QMainWindow):
             
         else:
             self.vol_corr = self.vol
-        self.data_line.setData1(self.dt,self.flow) #update the data
+        self.data_line1.setData1(self.dt,self.flow) #update the data
 
         self.data_line21.setData(self.dt,self.vol)
         self.data_line3.setData(self.dt,self.vol_corr)
