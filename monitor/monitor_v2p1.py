@@ -38,6 +38,8 @@ p1 = adafruit_lps35hw.LPS35HW(i2c, address = 93)
 p1.data_rate = adafruit_lps35hw.DataRate.RATE_75_HZ
 p2.data_rate = adafruit_lps35hw.DataRate.RATE_75_HZ
 mbar2cmh20 = 1.0/0.980665
+print('p1 = ',p1.pressure)
+print('p2 = ',p2.pressure)
 
 
 # Now read out the pressure difference between the sensors
@@ -45,7 +47,8 @@ p1.zero_pressure()
 p2.zero_pressure()
 dp0 = p1.pressure - p2.pressure
 
-
+print('p1 = ',p1.pressure)
+print('p2 = ',p2.pressure)
 
 """
 i2c = busio.I2C(board.SCL,board.SDA)
