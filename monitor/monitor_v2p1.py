@@ -99,6 +99,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dp = [((p1.pressure - p2.pressure)-dp0)*mbar2cmh20]
         self.p1 = [p1.pressure*mbar2cmh20]
         self.p2 = [p2.pressure*mbar2cmh20]
+        print('p1 = ',p1.pressure)
+        print('p2 = ',p2.pressure)
+        print('p1 arr = ',self.p1)
+        print('p2 arr = ',self.p2)
         
         # plot data: x, y values
         # make a QPen object to hold the marker properties
@@ -134,6 +138,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dp.append(((p1.pressure - p2.pressure)-dp0)*mbar2cmh20)
         self.p1.append(p1.pressure*mbar2cmh20)
         self.p2.append(p2.pressure*mbar2cmh20)
+        print('p1 = ',p1.pressure)
+        print('p2 = ',p2.pressure)
+        print('p1 arr = ',self.p1)
+        print('p2 arr = ',self.p2)
         
         self.data_line1.setData(self.dt,self.p1) #update the data
         self.data_line2.setData(self.dt,self.p2)
