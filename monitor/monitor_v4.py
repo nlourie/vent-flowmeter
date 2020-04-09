@@ -185,8 +185,11 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.drift_model = [0,datetime.utcnow().timestamp()/1000*self.t_update]
         self.i_valleys = []
-        self.time_to_show = 60 #s
+        self.time_to_show = 30 #s
         
+         
+
+
     def update_plot_data(self):
         # This is what happens every timer loop
         
@@ -212,8 +215,11 @@ class MainWindow(QtWidgets.QMainWindow):
         # THis should zero it out okay if there's no noticeable "dips"
         self.vol = signal.detrend(np.cumsum(self.flow))
         
+        self.fs = 1/(self.t[-1] - self.t[-2])
+        print('Sample Freq = ',self.fs)
+
         negative_mean_subtracted_volume = [-1*(v-np.mean(self.vol)) for v in self.vol]
-        i_valleys = breath_detect_coarse(negative_mean_subtracted_volume,fs = 1000/self.t_update,plotflag = False)
+        i_valleys = breath_detect_coarse(negative_mean_subtracted_volume,fs = self.fs,plotflag = False)
         self.i_valleys = i_valleys
             
             #print('i_valleys = ',self.i_valleys)
