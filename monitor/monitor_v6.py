@@ -119,7 +119,7 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.graph0 = pg.PlotWidget()
         self.graph1 = pg.PlotWidget()
-        #self.graph2 = pg.PlotWidget()
+        self.graph2 = pg.PlotWidget()
         self.graph3 = pg.PlotWidget()
         
         layout = QtWidgets.QVBoxLayout()
@@ -180,8 +180,8 @@ class MainWindow(QtWidgets.QMainWindow):
         
         # graph2
         
-        #self.data_line21 = self.graph2.plot(self.dt,self.flow,pen = pen)
-        #self.data_line22 = self.graph2.plot(self.dt,self.flow,pen = pen)
+        self.data_line21 = self.graph2.plot(self.dt,self.flow,pen = pen)
+        self.data_line22 = self.graph2.plot(self.dt,self.flow,pen = pen)
         # graph3
         
         
@@ -269,7 +269,9 @@ class MainWindow(QtWidgets.QMainWindow):
             v_drift[0:self.i_valleys[1]] = np.polyval(np.polyfit(t[i_valleys[0:1]],vol[self.i_valleys[0:1]],1),t[0:self.i_valleys[1]],)
             v_drift[self.i_valleys[0]:self.i_valleys[-1]] = v_drift_within_spline
             v_drift[self.i_valleys[-1]:] = np.polyval(np.polyfit(t[self.i_valleys[-2:]],vol[self.i_valleys[-2:]],1),t[self.i_valleys[-1]:])
+            self.v_drift = v_drift
             self.vol_corr = vol - v_drift
+            self.data_line22.setData(self.dt,self.v_drift)
             
         else:
             self.vol_corr = self.vol
@@ -277,7 +279,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.data_line02.setData(self.dt,self.p2)
         self.data_line1.setData(self.dt,self.flow) #update the data
 
-        #self.data_line21.setData(self.dt,self.vol)
+        self.data_line21.setData(self.dt,self.vol)
         self.data_line3.setData(self.dt,self.vol_corr)
         
 
