@@ -152,9 +152,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.graph3.setLabel('left','V corr','L',**labelStyle)
 
         # change the plot range
-        #self.graph0.setYRange(-30,30,padding = 0.1)
-        #self.graph1.setYRange(-2,2,padding = 0.1)
-        #self.graph3.setYRange(-0.5,1.5,padding = 0.1)
+        self.graph0.setYRange(-30,30,padding = 0.1)
+        self.graph1.setYRange(-2,2,padding = 0.1)
+        self.graph3.setYRange(-0.5,15,padding = 0.1)
         #self.graph3.setYRange(200,200,padding = 0.1)
                                              
         self.x  = [0]
