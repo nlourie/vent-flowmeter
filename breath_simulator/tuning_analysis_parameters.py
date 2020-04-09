@@ -15,6 +15,8 @@ from datetime import datetime
 import numpy as np
 from scipy import signal
 import matplotlib.pyplot as plt
+from scipy import interpolate
+
 def breath_detect_coarse(flow,fs,plotflag = False):
     """
     %% This function detects peaks of flow signal
@@ -71,9 +73,25 @@ vol = signal.detrend(np.cumsum(flow))
 negative_mean_subtracted_volume = [-1*(v-np.mean(vol)) for v in vol]
 i_valleys = breath_detect_coarse(negative_mean_subtracted_volume,fs = fs,plotflag = False)
 
-drift_model = np.polyfit(time[i_valleys],vol[i_valleys],1)
-v_drift = np.polyval(drift_model,time)
+
+model = 'spline'
+
+if model == 'linear':
+    drift_model = np.polyfit(time[i_valleys],vol[i_valleys],1)
+    v_drift = np.polyval(drift_model,time)
+
+elif model == 'spline':
+
+    
+    drift_model = interpolate.interp1d(time[i_valleys],vol[i_valleys],kind = 'linear')
+    v_drift_within_spline = drift_model(time[i_valleys[0]:i_valleys[-1]])
+    v_drift = np.zeros(len(time))
+    v_drift[0:i_valleys[1]] = np.polyval(np.polyfit(time[i_valleys[0:1]],vol[i_valleys[0:1]],1),time[0:i_valleys[1]],)
+    v_drift[i_valleys[0]:i_valleys[-1]] = v_drift_within_spline
+    v_drift[i_valleys[-1]:] = np.polyval(np.polyfit(time[i_valleys[-2:]],vol[i_valleys[-2:]],1),time[i_valleys[-1]:])
+
 vol_corr = vol - v_drift
+
 
 
 plt.figure(figsize = (10,10))
@@ -85,6 +103,7 @@ plt.ylabel('Flow')
 plt.subplot(3,1,2)
 plt.plot(time,vol)
 plt.plot(time[i_valleys],vol[i_valleys],'ro')
+plt.plot(time,v_drift)
 plt.ylabel('Raw Volume')
 
 plt.subplot(3,1,3)
