@@ -107,7 +107,7 @@ def breath_detect_coarse(flow,fs,plotflag = False):
                                     prominence = minpeakprominence,
                                     width = minpeakwidth)
     """
-    #print('found peaks at index = ',peak_index)
+    print('found peaks at index = ',peak_index)
     return peak_index
 
 
@@ -119,13 +119,13 @@ class MainWindow(QtWidgets.QMainWindow):
         
         self.graph0 = pg.PlotWidget()
         self.graph1 = pg.PlotWidget()
-        #self.graph2 = pg.PlotWidget()
+        self.graph2 = pg.PlotWidget()
         self.graph3 = pg.PlotWidget()
         
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self.graph0)
         layout.addWidget(self.graph1)
-        #layout.addWidget(self.graph2)
+        layout.addWidget(self.graph2)
         layout.addWidget(self.graph3)
         
         widget = QtWidgets.QWidget()
@@ -139,7 +139,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.graph1.setBackground('k')
         self.graph0.showGrid(x = True, y = True)
         self.graph1.showGrid(x=True,y=True)
-        #self.graph2.showGrid(x = True, y = True)
+        self.graph2.showGrid(x = True, y = True)
         self.graph3.showGrid(x = True, y = True)
 
         
@@ -170,8 +170,8 @@ class MainWindow(QtWidgets.QMainWindow):
         self.flow = [0]
         self.vol = [0]
         
-        #print('P1 = ',p1.pressure,' cmH20')
-        #print('P2 = ',p2.pressure,' cmH20')
+        print('P1 = ',p1.pressure,' cmH20')
+        print('P2 = ',p2.pressure,' cmH20')
 
 
         # plot data: x, y values
@@ -184,8 +184,8 @@ class MainWindow(QtWidgets.QMainWindow):
         
         # graph2
         
-        #self.data_line21 = self.graph2.plot(self.dt,self.flow,pen = pen)
-        #self.data_line22 = self.graph2.plot(self.dt,self.flow,pen = pen)
+        self.data_line21 = self.graph2.plot(self.dt,self.flow,pen = pen)
+        self.data_line22 = self.graph2.plot(self.dt,self.flow,pen = pen)
         # graph3
         
         
@@ -247,7 +247,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.vol = signal.detrend(np.cumsum(self.flow))
         
         self.fs = 1/(self.t[-1] - self.t[-2])
-        #print('Sample Freq = ',self.fs)
+        print('Sample Freq = ',self.fs)
 
         negative_mean_subtracted_volume = [-1*(v-np.mean(self.vol)) for v in self.vol]
         i_valleys = breath_detect_coarse(negative_mean_subtracted_volume,fs = self.fs,plotflag = False)
@@ -260,8 +260,12 @@ class MainWindow(QtWidgets.QMainWindow):
         if len(self.i_valleys) >= 2:
             t = np.array(self.t)
             vol = np.array(self.vol)
-            #dt = np.array(self.dt)
-            #print('found peaks at dt = ',dt[self.i_valleys])
+            dt = np.array(self.dt)
+            print('found peaks at dt = ',dt[self.i_valleys])
+            #self.drift_model = np.polyfit(t[self.i_valleys],vol[self.i_valleys],1)
+            #self.v_drift = np.polyval(self.drift_model,t)
+            #self.vol_corr = vol - self.v_drift
+            #self.data_line22.setData(self.dt,self.v_drift)
             
             self.drift_model = interpolate.interp1d(t[i_valleys],vol[i_valleys],kind = 'linear')
             v_drift_within_spline = self.drift_model(t[i_valleys[0]:i_valleys[-1]])
@@ -271,7 +275,7 @@ class MainWindow(QtWidgets.QMainWindow):
             v_drift[self.i_valleys[-1]:] = np.polyval(np.polyfit(t[self.i_valleys[-2:]],vol[self.i_valleys[-2:]],1),t[self.i_valleys[-1]:])
             self.v_drift = v_drift
             self.vol_corr = vol - v_drift
-            #self.data_line22.setData(self.dt,self.v_drift)
+            self.data_line22.setData(self.dt,self.v_drift)
             
         else:
             self.vol_corr = self.vol
@@ -279,11 +283,29 @@ class MainWindow(QtWidgets.QMainWindow):
         self.data_line02.setData(self.dt,self.p2)
         self.data_line1.setData(self.dt,self.flow) #update the data
 
-        #self.data_line21.setData(self.dt,self.vol)
+        self.data_line21.setData(self.dt,self.vol)
         self.data_line3.setData(self.dt,self.vol_corr)
         
 
 
+    """        
+    def update_cal(self)   : 
+        print ('len dt = ',len(self.dt))
+        if len(self.dt) > 50:
+            
+            # try to run the monitor utils functions
+            fs = 1000/self.t_update
+            i_peaks,i_valleys,i_infl_points,vol_last_peak,flow,self.vol_corr,self.vol_offset,time,vol,drift_model = mu.get_processed_flow(np.array(self.t),np.array(self.y),fs,SmoothingParam = 0,smoothflag=True,plotflag = False)
+            if len(i_peaks) > 2:
+                self.drift_model = drift_model
+                print('updating calibration')
+                self.calibrating = True
+
+        self.data_line2.setData(self.dt,vol)
+        self.data_line5.setData(self.dt,np.polyval(self.drift_model,time))
+        self.data_line3.setData(self.dt,vol - np.polyval(self.drift_model,time))
+        print('drift model = ',self.drift_model)
+    """
 
 
 def main():
