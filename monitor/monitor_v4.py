@@ -22,7 +22,7 @@ from scipy import signal
 import board
 import busio
 import adafruit_lps35hw
-
+import time
 #import monitor_utils as mu
 
 # Initialize the i2c bus
@@ -43,13 +43,23 @@ mbar2cmh20 = 1.01972
 
 
 # Now read out the pressure difference between the sensors
-p1.zero_pressure()
-p2.zero_pressure()
-
 print('p1_0 = ',p1.pressure,' mbar')
 print('p1_0 = ',p1.pressure*mbar2cmh20,' cmH20')
-print('p2_0 = ',p1.pressure,' mbar')
-print('p2_0 = ',p1.pressure*mbar2cmh20,' cmH20')
+print('p2_0 = ',p2.pressure,' mbar')
+print('p2_0 = ',p2.pressure*mbar2cmh20,' cmH20')
+
+print('')
+print('Now zero the pressure:')
+p1.zero_pressure()
+time.sleep(1)
+p2.zero_pressure()
+time.sleep(1)
+print('p1_0 = ',p1.pressure,' mbar')
+print('p1_0 = ',p1.pressure*mbar2cmh20,' cmH20')
+print('p2_0 = ',p2.pressure,' mbar')
+print('p2_0 = ',p2.pressure*mbar2cmh20,' cmH20')
+
+print()
 
 def breath_detect_coarse(flow,fs,plotflag = False):
     """
@@ -102,6 +112,8 @@ class MainWindow(QtWidgets.QMainWindow):
     def __init__(self, *args, **kwargs):
         super(MainWindow, self).__init__(*args, **kwargs)
         self.setWindowTitle("Standalone Respiratory Monitor")
+        
+        self.graph0 = pg.PlotWidget()
         self.graph1 = pg.PlotWidget()
         self.graph2 = pg.PlotWidget()
         self.graph3 = pg.PlotWidget()
