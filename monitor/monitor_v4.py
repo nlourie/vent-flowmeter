@@ -195,7 +195,7 @@ class MainWindow(QtWidgets.QMainWindow):
             self.dt= self.dt[1:]
             self.p = self.p[1:]
             self.vol = self.vol[1:]
-            
+            self.flow = self.flow[1:]
         
         self.x.append(self.x[-1] + 1) # add a new value 1 higher than the last
         self.t.append(datetime.utcnow().timestamp())
@@ -205,7 +205,9 @@ class MainWindow(QtWidgets.QMainWindow):
         self.flow.append(dp_cmh20)
         
         self.p.append((p1.pressure-p10)*mbar2cmh20)
-        self.vol = np.cumsum(self.flow)
+        # remove any linear trend in the volume data since it's just nonsense.
+        # THis should zero it out okay if there's no noticeable "dips"
+        self.vol = signal.detrend(np.cumsum(self.flow))
         
         try:
             negative_mean_subtracted_volume = [-1*(v-np.mean(self.vol)) for v in self.vol]
