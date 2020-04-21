@@ -29,3 +29,10 @@ fit = interpolate.interp1d(v,f,kind = 'cubic')
 f_fit = fit(v_fit)
 
 plt.plot(v_fit,f_fit,'r-',label = 'Cubic Spline Fit')
+
+
+dp,flow = np.loadtxt('lps33_flow_calibration.txt',skiprows = 1,delimiter = '\t',unpack = True)
+plt.figure()
+plt.plot(dp,flow,'ko',label = 'realtime data')
+plt.xlabel('dP (cm H20)',fontsize = 14)
+plt.ylabel('Flow (L/s)',fontsize = 14)

@@ -172,7 +172,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # Set the label properties with valid CSS commands -- https://groups.google.com/forum/#!topic/pyqtgraph/jS1Ju8R6PXk
         labelStyle = {'color': '#FFF', 'font-size': '12pt'}
         self.graph1.setLabel('left','dP','cmH20',**labelStyle)
-        self.graph2.setLabel('left','Flow','L/s',**labelStyle)
+        self.graph2.setLabel('left','Voltage','V',**labelStyle)
         self.graph2.setLabel('bottom', 'Time', 's', **labelStyle)
         self.graph3.setLabel('left','Flow','L/s',**labelStyle)
         self.graph3.setLabel('bottom','dP','cmH20',**labelStyle)
@@ -191,7 +191,10 @@ class MainWindow(QtWidgets.QMainWindow):
         self.dp = [(p1.pressure - p2.pressure)*mbar2cmh20]
         self.p1 = [(p1.pressure)*mbar2cmh20]
         self.p2 = [(p2.pressure)*mbar2cmh20]
-        self.flow = [honeywell_v2f(honeywell.voltage)]
+        last_voltage = honeywell.voltage
+        self.volt = last_voltage
+        self.flow = [honeywell_v2f(last_voltage)]
+        
         
         #print('P1 = ',p1.pressure,' cmH20')
         #print('P2 = ',p2.pressure,' cmH20')
@@ -204,7 +207,7 @@ class MainWindow(QtWidgets.QMainWindow):
         #self.data_line11 = self.graph0.plot(self.dt,self.p1,pen = pen)
         #self.data_line12 = self.graph0.plot(self.dt,self.p2,pen = pen2)
         self.data_line1 = self.graph1.plot(self.dt,self.dp,pen = pen2)
-        self.data_line2 = self.graph2.plot(self.dt, self.flow,pen = pen)
+        self.data_line2 = self.graph2.plot(self.dt, self.volt,pen = pen)
         self.data_line3 = self.graph3.plot(self.dp,self.flow,pen = pen)
         # graph2
         
@@ -254,22 +257,25 @@ class MainWindow(QtWidgets.QMainWindow):
             self.p1 = self.p1[1:]
             self.p2 = self.p2[1:]
             self.flow = self.flow[1:]
+            self.volt = self.volt[1:]
         
         self.x.append(self.x[-1] + 1) # add a new value 1 higher than the last
         self.t.append(datetime.utcnow().timestamp())
         self.dt = [(ti - self.t[0]) for ti in self.t]
         dp_cmh20 = ((p1.pressure - p2.pressure))*mbar2cmh20
         self.dp.append(dp_cmh20)
-        self.flow.append(honeywell_v2f(honeywell.voltage))
+        last_voltage = honeywell.voltage
+        self.volt.append(last_voltage)
+        self.flow.append(honeywell_v2f(last_voltage))
         
         self.p1.append(p1.pressure*mbar2cmh20)
         self.p2.append(p2.pressure*mbar2cmh20)
 
         self.data_line1.setData(self.dt,self.dp)
-        self.data_line2.setData(self.dt,self.flow)
+        self.data_line2.setData(self.dt,self.volt)
         self.data_line3.setData(self.dp,self.flow)
 
-        file.write('%f \t %f\n' %(self.dp[-1],self.flow[-1]))
+        file.write('%f \t %f\n' %(self.dp[-1],self.volt[-1]))
 
         
 
