@@ -192,7 +192,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.p1 = [(p1.pressure)*mbar2cmh20]
         self.p2 = [(p2.pressure)*mbar2cmh20]
         last_voltage = honeywell.voltage
-        self.volt = last_voltage
+        self.volt = [last_voltage]
         self.flow = [honeywell_v2f(last_voltage)]
         
         
