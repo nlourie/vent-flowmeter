@@ -35,6 +35,7 @@ i2c = busio.I2C(board.SCL, board.SDA)
 
 # Initialize the ADC
 ads = ADS.ADS1115(i2c)
+ads.gain = 2/3
 honeywell = AnalogIn(ads,ADS.P3)
 # Read this in by calling honeywell.voltage
 
@@ -42,8 +43,8 @@ honeywell = AnalogIn(ads,ADS.P3)
 
 #Honeywell Volts to FLow calibration
 
-f = [0.,0.,25.,50.,75.,100.,150.,200.]
-v = [0.,1,2.99,3.82,4.3,4.58,4.86,5.0]
+f = [0.,0.,25.,50.,75.,100.,150.,200.,200.]
+v = [0.,1,2.99,3.82,4.3,4.58,4.86,5.0,7.]
 honeywell_v2f = interpolate.interp1d(v,f,kind = 'cubic')
 
 
