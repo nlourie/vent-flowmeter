@@ -152,7 +152,7 @@ class MainWindow(QtWidgets.QMainWindow):
         layout = QtWidgets.QVBoxLayout()
         layout.addWidget(self.graph1)
         layout.addWidget(self.graph2)
-        
+        layout.addWidget(self.graph3) 
         widget = QtWidgets.QWidget()
         widget.setLayout(layout)
         
@@ -269,7 +269,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.data_line2.setData(self.dt,self.flow)
         self.data_line3.setData(self.dp,self.flow)
 
-        file.write('%f \t %f' %(self.dp[-1],self.flow[-1]))
+        file.write('%f \t %f\n' %(self.dp[-1],self.flow[-1]))
 
         
 
