@@ -205,7 +205,7 @@ class MainWindow(QtWidgets.QMainWindow):
         # graph3
         
         
-        self.data_line3 = self.graph3.plot(self.dt,self.vol,pen = pen)
+        #self.data_line3 = self.graph3.plot(self.dt,self.vol,pen = pen)
 
         self.calibrating = False
 
