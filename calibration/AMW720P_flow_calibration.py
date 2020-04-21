@@ -16,7 +16,7 @@ f = np.array([0.,25.,50.,75.,100.,150.,200.])
 v = np.array([1,2.99,3.82,4.3,4.58,4.86,5.0])
 
 plt.figure()
-plt.plot(v,f,'ko',label = ')
+plt.plot(v,f,'ko',label = 'Cal Data from Honeywell')
 
 plt.xlabel('Voltage (V)',fontsize = 14)
 plt.ylabel('Flow (L/m)',fontsize = 14)
