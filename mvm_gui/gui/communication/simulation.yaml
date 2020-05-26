@@ -1,0 +1,61 @@
+# VAPS parameters
+
+# timing of the cycle (in s)
+#
+# p2        /\________
+# p1       /          \
+#         /            \
+# p0 ----/              \____
+#        T0  T1 T2    T3 T4
+#
+# T0 = 0 = pressure cycle start
+# T1 = pressure reach maximum
+# T2 = pressure drop to intermediate level
+# T3 = pressure reaches intermediate level
+# T4 = pressure drops to zero
+# T5 = cycle repeats
+#
+# times should be given relative to the previous one
+# T1 = T0+t1
+# T2 = T1+t2
+# ...
+# T4 = T3+t4
+# 
+# p1 = intermediate level of pressure
+# p2 = maximum level of pressure
+
+t0 :   0
+t1 :  .5
+t2 : 1.0
+t3 :  .5
+t4 : 1.5
+t5 : 3.0
+
+p0 : 15
+p1 : 50
+p2 : 70
+
+#         
+# f1     |\ 
+# f2     | ------------
+#        |             |
+# f3 ____|             |  __
+#                      | /
+# f4                   |/
+#
+#        t0  t1 t2    t3 t4
+
+f1 : 20
+f2 : 10
+f3 : 5
+f4 : 2
+
+# decay_time is given in units of t2-t1
+
+decay_time : 0.1
+resolution : 0.02
+
+# breath timing fluctuations: a breath restarts after
+# a cycle with fluctuations given by this parameter (in s)
+
+btiming_fluctuations : 1
